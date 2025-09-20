@@ -1,22 +1,13 @@
 import os
 import subprocess
 from django.shortcuts import render, redirect, resolve_url
-from django.http import HttpResponse
 from django.contrib import messages
 
 # modules needed for user authentication
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 
 #for pasword reset
-from django.contrib.auth import views
-from django.core.mail import send_mail, BadHeaderError
-from django.contrib.auth.forms import PasswordResetForm
-from django.template.loader import render_to_string
 from django.db.models.query_utils import Q
-from django.utils.http import urlsafe_base64_encode
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.encoding import force_bytes
 from django.contrib.auth.views import PasswordResetView
 
 from django.conf import settings
@@ -125,6 +116,6 @@ class CustomPasswordResetView(PasswordResetView):
         associated_user = User.objects.filter(Q(email=user_email))
         if not associated_user.exists():
             messages.error(self.request, 'Email not found. please create an acount')
-            return redirect(resolve_url('login'))
+            return redirect(resolve_url('password_reset'))
 
         return super().form_valid(form)
