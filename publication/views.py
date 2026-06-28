@@ -62,6 +62,8 @@ def verify_payment(request):
             publication.save()
             messages.success(request, 'Successfully paid for publication, you can go ahead to download')
             return redirect(reverse('publication'))
+        elif payment_info.get('metadata').get('transaction_type') == 'course_payment':
+            return redirect(reverse('course:verify_payment') + f"?reference={reference}")
         else:
             messages.success(request, 'Thanks for making donations, God sees and rewards openly')
             return redirect('/')

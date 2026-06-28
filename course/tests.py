@@ -1,11 +1,13 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
+from unittest.mock import patch
 from user_authentication.models import UserProfile
 from user_authentication.forms import RegisterForm
 from course.models import (
     Mentor, Course, Module, Assessment,
     AssessmentQuestion, AssessmentChoice,
-    CourseEnrollment, ModuleProgress, AssessmentSubmission
+    CourseEnrollment, ModuleProgress, AssessmentSubmission,
+    CoursePayment
 )
 
 class CoursePlatformTestCase(TestCase):
@@ -186,3 +188,57 @@ class CoursePlatformTestCase(TestCase):
         # Check module progress is marked completed
         progress_exists_now = ModuleProgress.objects.filter(user=user, module=self.module, completed=True).exists()
         self.assertTrue(progress_exists_now)
+
+    @patch('course.views.PayStack.generate_checkout_url')
+    @patch('course.views.PayStack.verify_payment')
+    def test_paid_course_enrollment_flow(self, mock_verify, mock_generate):
+        # Set up mock return values before requests are made
+        mock_generate.return_value = "https://checkout.paystack.com/mock-url"
+
+        # 1. Create a paid course
+        paid_course = Course.objects.create(
+            title="Paid Advanced Leadership",
+            description="Deep dive paid course.",
+            is_paid=True,
+            price=5000
+        )
+        
+        # Create user profile to match mentor
+        user = User.objects.create_user(username="paid_student@example.com", email="paid_student@example.com")
+        UserProfile.objects.create(user=user, gender="M", interests="SPIRITUAL")
+        self.client.force_login(user)
+        
+        # 2. Try to enroll -> should redirect to initiate_payment (which itself redirects with 302)
+        response = self.client.post(f'/courses/{paid_course.id}/enroll/')
+        self.assertRedirects(response, f'/courses/{paid_course.id}/payment/initiate/', target_status_code=302)
+        
+        # Verify a pending CoursePayment record is created
+        payment_record = CoursePayment.objects.get(user=user, course=paid_course)
+        self.assertEqual(payment_record.amount, 5000)
+        self.assertFalse(payment_record.approved)
+        
+        # 3. Access initiate payment view to verify the external Paystack redirect
+        response = self.client.get(f'/courses/{paid_course.id}/payment/initiate/')
+        self.assertRedirects(response, "https://checkout.paystack.com/mock-url", fetch_redirect_response=False)
+        
+        # 4. Verify payment callback
+        mock_verify.return_value = {
+            'status': 'success',
+            'metadata': {
+                'transaction_type': 'course_payment',
+                'course_payment_id': payment_record.id
+            }
+        }
+        
+        # Trigger verification
+        response = self.client.get('/courses/payment/verify/?reference=mock_reference')
+        self.assertRedirects(response, '/courses/dashboard/')
+        
+        # Check payment record is approved and enrollment is created
+        payment_record.refresh_from_db()
+        self.assertTrue(payment_record.approved)
+        
+        enrollment = CourseEnrollment.objects.get(user=user, course=paid_course)
+        self.assertIsNotNone(enrollment)
+        # Should be matched with male spiritual mentor (Brother John)
+        self.assertEqual(enrollment.mentor, self.mentor_male_spiritual)

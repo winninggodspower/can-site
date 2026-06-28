@@ -48,6 +48,15 @@ c2, _ = Course.objects.get_or_create(
     description="A professional course designed to help young leaders find global relevance in their careers. Topics include workplace ethics, building authority in your field, networking, and public speaking."
 )
 
+c3, _ = Course.objects.get_or_create(
+    title="Advanced Kingdom Leadership Masterclass",
+    defaults={
+        'description': "A premium self-paced course designed for ministry and corporate leaders seeking global relevance, advanced team governance, and biblical strategy. Access to exclusive resources and mentorship.",
+        'is_paid': True,
+        'price': 15000
+    }
+)
+
 # Create modules for Course 1
 mod1, _ = Module.objects.get_or_create(
     course=c1,

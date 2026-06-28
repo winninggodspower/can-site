@@ -3,7 +3,8 @@ from unfold.admin import ModelAdmin, TabularInline, StackedInline
 from .models import (
     Mentor, Course, Module, Assessment,
     AssessmentQuestion, AssessmentChoice,
-    CourseEnrollment, ModuleProgress, AssessmentSubmission
+    CourseEnrollment, ModuleProgress, AssessmentSubmission,
+    CoursePayment
 )
 
 class AssessmentChoiceInline(TabularInline):
@@ -36,7 +37,7 @@ class ModuleInline(StackedInline):
         )
 
 class CourseAdmin(ModelAdmin):
-    list_display = ('title', 'created_at')
+    list_display = ('title', 'is_paid', 'price', 'created_at')
     inlines = [ModuleInline]
     class Media:
         js = (
@@ -77,4 +78,10 @@ admin.site.register(AssessmentQuestion, AssessmentQuestionAdmin)
 admin.site.register(CourseEnrollment, CourseEnrollmentAdmin)
 admin.site.register(ModuleProgress, ModuleProgressAdmin)
 admin.site.register(AssessmentSubmission, AssessmentSubmissionAdmin)
+
+class CoursePaymentAdmin(ModelAdmin):
+    list_display = ('user', 'course', 'amount', 'approved', 'payment_date')
+    list_filter = ('approved', 'course')
+
+admin.site.register(CoursePayment, CoursePaymentAdmin)
 

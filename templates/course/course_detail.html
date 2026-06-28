@@ -15,7 +15,16 @@
         
         <div class="container max-w-6xl mx-auto px-4 relative z-10 flex flex-col justify-center items-center text-center">
             <h1 class="text-3xl md:text-5xl font-extrabold max-w-4xl leading-tight mb-4">{{ course.title }}</h1>
-            <p class="text-blue-150 text-sm uppercase font-bold tracking-wider mb-8"><i class="far fa-clock mr-1 text-primary-gold"></i> Self-Paced Program</p>
+            <p class="text-blue-150 text-sm uppercase font-bold tracking-wider mb-8">
+                <i class="far fa-clock mr-1 text-primary-gold"></i> Self-Paced Program
+                {% if course.is_paid %}
+                    <span class="mx-2">•</span>
+                    <i class="fas fa-tag mr-1 text-primary-gold"></i> ₦{{ course.price }}
+                {% else %}
+                    <span class="mx-2">•</span>
+                    <i class="fas fa-tag mr-1 text-primary-gold"></i> Free
+                {% endif %}
+            </p>
             
             <!-- Registration Call to Action -->
             <div class="w-full max-w-md mx-auto">
@@ -35,7 +44,11 @@
                         <form action="{% url 'course:enroll' course.id %}" method="post">
                             {% csrf_token %}
                             <button type="submit" class="btn-yellow-gradient font-bold px-8 py-3 text-lg rounded-md shadow-lg w-full sm:w-auto hover:scale-105 transition-transform">
-                                <i class="fas fa-user-plus mr-2"></i> Enroll in Course
+                                {% if course.is_paid and not has_paid %}
+                                    <i class="fas fa-credit-card mr-2"></i> Pay &amp; Enroll (₦{{ course.price }})
+                                {% else %}
+                                    <i class="fas fa-user-plus mr-2"></i> Enroll in Course
+                                {% endif %}
                             </button>
                         </form>
                     {% endif %}

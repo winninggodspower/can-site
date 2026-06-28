@@ -1,12 +1,14 @@
 import re
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
+from main.Paystack import PayStack
 from .models import (
     Course, Module, Mentor, CourseEnrollment,
     ModuleProgress, Assessment, AssessmentQuestion,
-    AssessmentChoice, AssessmentSubmission
+    AssessmentChoice, AssessmentSubmission, CoursePayment
 )
 
 def get_youtube_id(url):
@@ -39,18 +41,28 @@ def course_detail_view(request, course_id):
     modules = course.modules.order_by('order')
     
     is_enrolled = False
+    has_paid = False
     if request.user.is_authenticated:
         is_enrolled = CourseEnrollment.objects.filter(user=request.user, course=course).exists()
+        if course.is_paid:
+            has_paid = CoursePayment.objects.filter(user=request.user, course=course, approved=True).exists()
 
     return render(request, 'course/course_detail.html', {
         'course': course,
         'modules': modules,
         'is_enrolled': is_enrolled,
+        'has_paid': has_paid,
     })
 
 @login_required
 def enroll_view(request, course_id):
     course = get_object_or_404(Course, pk=course_id)
+    
+    if course.is_paid:
+        has_paid = CoursePayment.objects.filter(user=request.user, course=course, approved=True).exists()
+        if not has_paid:
+            return redirect('course:initiate_payment', course_id=course.id)
+
     enrollment, created = CourseEnrollment.objects.get_or_create(user=request.user, course=course)
     
     if created:
@@ -232,3 +244,96 @@ def complete_module_view(request, course_id, module_id):
         else:
             return redirect('course:dashboard')
     return redirect('course:module_detail', course_id=course_id, module_id=module_id)
+
+@login_required
+def initiate_course_payment_view(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    if not course.is_paid:
+        messages.info(request, "This course is free. You can enroll directly.")
+        return redirect('course:enroll', course_id=course.id)
+
+    # Check if they already have an approved payment
+    has_paid = CoursePayment.objects.filter(user=request.user, course=course, approved=True).exists()
+    if has_paid:
+        messages.info(request, "You have already paid for this course.")
+        return redirect('course:enroll', course_id=course.id)
+
+    # Create a CoursePayment entry
+    course_payment = CoursePayment.objects.create(
+        user=request.user,
+        course=course,
+        amount=course.price
+    )
+
+    # Determine callback URL dynamically
+    callback_url = request.build_absolute_uri(reverse('course:verify_payment'))
+
+    # Metadata for Paystack webhook/callback
+    metadata = {
+        'transaction_type': 'course_payment',
+        'course_payment_id': course_payment.id
+    }
+
+    # Paystack amount is in kobo (multiply by 100)
+    redirect_url = PayStack.generate_checkout_url(
+        email=request.user.email,
+        amount=course.price * 100,
+        ref=course_payment.id,
+        metadata=metadata,
+        callback_url=callback_url
+    )
+
+    if redirect_url:
+        return redirect(redirect_url)
+    else:
+        messages.error(request, "Could not initialize payment gateway. Please try again later.")
+        return redirect('course:course_detail', course_id=course.id)
+
+def verify_course_payment_view(request):
+    reference = request.GET.get('reference')
+    if not reference:
+        messages.error(request, "No reference found for transaction.")
+        return redirect('course:course_list')
+
+    payment_info = PayStack.verify_payment(reference)
+    if payment_info and payment_info.get('status') == 'success':
+        metadata = payment_info.get('metadata', {})
+        if metadata.get('transaction_type') == 'course_payment':
+            payment_id = metadata.get('course_payment_id')
+            try:
+                course_payment = CoursePayment.objects.get(id=payment_id)
+                if not course_payment.approved:
+                    course_payment.approved = True
+                    course_payment.save()
+                    
+                    # Create enrollment since they have successfully paid!
+                    enrollment, created = CourseEnrollment.objects.get_or_create(
+                        user=course_payment.user,
+                        course=course_payment.course
+                    )
+                    
+                    # Add enrollment success message matching enroll_view details
+                    if created:
+                        if enrollment.mentor:
+                            messages.success(
+                                request,
+                                f"Payment successful! You have enrolled in {course_payment.course.title} and matched with Mentor: {enrollment.mentor.name} ({enrollment.mentor.email})."
+                            )
+                        else:
+                            messages.success(
+                                request,
+                                f"Payment successful! You have enrolled in {course_payment.course.title}. Our team will match you with a mentor shortly."
+                            )
+                    else:
+                        messages.success(request, f"Payment successful! You are enrolled in {course_payment.course.title}.")
+                
+                return redirect('course:dashboard')
+            except CoursePayment.DoesNotExist:
+                messages.error(request, "Associated course payment record not found.")
+                return redirect('course:course_list')
+        else:
+            messages.error(request, "Invalid transaction verification.")
+            return redirect('course:course_list')
+    else:
+        messages.error(request, "Payment verification failed or was cancelled.")
+        return redirect('course:course_list')

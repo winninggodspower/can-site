@@ -58,6 +58,12 @@
                         <div class="p-6 pt-0 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
                             <span class="text-xs text-gray-500 flex items-center">
                                 <i class="far fa-folder-open mr-1 text-primary-gold"></i> Self-Paced
+                                <span class="mx-2">•</span>
+                                {% if course.is_paid %}
+                                    <span class="text-primary-blue font-semibold">₦{{ course.price }}</span>
+                                {% else %}
+                                    <span class="text-emerald-600 font-semibold">Free</span>
+                                {% endif %}
                             </span>
                             
                             {% if course.is_enrolled %}

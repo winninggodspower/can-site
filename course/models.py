@@ -28,6 +28,8 @@ class Course(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     banner = models.ImageField(upload_to='course_banners/', blank=True, null=True)
+    is_paid = models.BooleanField(default=False)
+    price = models.PositiveIntegerField(default=0, blank=True, help_text="Price in Naira (e.g., 5000)")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -153,3 +155,13 @@ class AssessmentSubmission(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.assessment.module.title} - Score: {self.score}%"
+
+class CoursePayment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='course_payments')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='payments')
+    amount = models.PositiveIntegerField(default=0)
+    payment_date = models.DateTimeField(auto_now_add=True)
+    approved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.user.username} paid {self.amount} for {self.course.title} - Approved: {self.approved}"

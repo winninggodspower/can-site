@@ -12,7 +12,7 @@ class PayStack:
 
     
     @classmethod
-    def generate_checkout_url(self, email, amount, ref=None, currency='NGN', metadata=None):
+    def generate_checkout_url(self, email, amount, ref=None, currency='NGN', metadata=None, callback_url=None):
         path = ('transaction/initialize/')
 
         if currency not in ['NGN', "USD", "GHS", "ZAR", "KES"]:
@@ -28,6 +28,10 @@ class PayStack:
 
         if ref:
             body['ref'] = ref
+            body['reference'] = ref
+
+        if callback_url:
+            body['callback_url'] = callback_url
 
         response = requests.post(url, headers=self.headers, json=body)
         print(response)
