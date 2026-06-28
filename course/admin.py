@@ -18,6 +18,7 @@ class AssessmentQuestionAdmin(ModelAdmin):
 class AssessmentQuestionInline(StackedInline):
     model = AssessmentQuestion
     extra = 1
+    show_change_link = True
 
 class AssessmentAdmin(ModelAdmin):
     list_display = ('title', 'module', 'passing_score')
@@ -26,6 +27,7 @@ class AssessmentAdmin(ModelAdmin):
 class ModuleInline(StackedInline):
     model = Module
     extra = 1
+    show_change_link = True
     fields = ('title', 'order', 'youtube_link', 'content')
     class Media:
         js = (
