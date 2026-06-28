@@ -1,0 +1,129 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block head %}
+    <title>{{ course.title }} - Church Arise Network</title>
+{% endblock head %}
+
+{% block body %}
+<div class="bg-gray-50 min-h-screen pb-16">
+    <!-- Course Banner Hero -->
+    <section class="relative bg-gradient-to-br from-primary-blue-dark to-primary-blue text-white overflow-hidden py-16 md:py-24">
+        {% if course.banner %}
+            <img src="{{ course.banner.url }}" alt="{{ course.title }}" class="absolute inset-0 w-full h-full object-cover opacity-35">
+        {% endif %}
+        
+        <div class="container max-w-6xl mx-auto px-4 relative z-10 flex flex-col justify-center items-center text-center">
+            <h1 class="text-3xl md:text-5xl font-extrabold max-w-4xl leading-tight mb-4">{{ course.title }}</h1>
+            <p class="text-blue-150 text-sm uppercase font-bold tracking-wider mb-8"><i class="far fa-clock mr-1 text-primary-gold"></i> Self-Paced Program</p>
+            
+            <!-- Registration Call to Action -->
+            <div class="w-full max-w-md mx-auto">
+                {% if request.user.is_authenticated %}
+                    {% if is_enrolled %}
+                        <div class="flex flex-col sm:flex-row justify-center gap-4">
+                            <a href="{% url 'course:dashboard' %}" class="btn-yellow-gradient font-bold shadow-lg inline-flex items-center justify-center">
+                                <i class="fas fa-home mr-2"></i> Go to Dashboard
+                            </a>
+                            {% if course.modules.exists %}
+                                <a href="{% url 'course:module_detail' course_id=course.id module_id=course.modules.first.id %}" class="bg-white text-primary-blue-dark hover:bg-gray-150 font-bold px-6 py-2.5 rounded-md shadow-lg inline-flex items-center justify-center transition">
+                                    Start Learning <i class="fas fa-play-circle ml-2 text-primary-gold"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <form action="{% url 'course:enroll' course.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-yellow-gradient font-bold px-8 py-3 text-lg rounded-md shadow-lg w-full sm:w-auto hover:scale-105 transition-transform">
+                                <i class="fas fa-user-plus mr-2"></i> Enroll in Course
+                            </button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'login' %}?next={{ request.path }}" class="btn-yellow-gradient font-bold px-8 py-3 text-lg rounded-md shadow-lg w-full sm:w-auto hover:scale-105 transition-transform inline-block">
+                        <i class="fas fa-sign-in-alt mr-2"></i> Login to Register
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container max-w-6xl mx-auto px-4 mt-12">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            <!-- Left 2 columns: Description & Modules -->
+            <div class="lg:col-span-2 space-y-10">
+                <!-- Description -->
+                <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
+                    <h2 class="text-2xl font-bold text-primary-blue-dark border-b pb-3 mb-4">About this Course</h2>
+                    <div class="text-gray-700 leading-relaxed text-base whitespace-pre-wrap">{{ course.description }}</div>
+                </div>
+
+                <!-- Syllabus / Modules -->
+                <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
+                    <h2 class="text-2xl font-bold text-primary-blue-dark border-b pb-3 mb-6">Course Syllabus</h2>
+                    {% if modules %}
+                        <div class="space-y-4">
+                            {% for module in modules %}
+                                <div class="flex items-start space-x-4 p-4 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition">
+                                    <div class="w-10 h-10 rounded-full bg-primary-gold-light border border-yellow-300 text-primary-gold flex items-center justify-center font-bold flex-shrink-0">
+                                        {{ module.order }}
+                                    </div>
+                                    <div class="flex-grow">
+                                        <h3 class="font-bold text-gray-800 text-lg mb-1">{{ module.title }}</h3>
+                                        <p class="text-gray-500 text-sm flex items-center">
+                                            <span class="mr-3"><i class="fab fa-youtube mr-1 text-red-500"></i> Video Lecture</span>
+                                            {% if module.assessment %}
+                                                <span><i class="fas fa-file-invoice mr-1 text-primary-blue"></i> Includes Assessment</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    {% if is_enrolled %}
+                                        <a href="{% url 'course:module_detail' course_id=course.id module_id=module.id %}" class="text-primary-blue hover:text-blue-700 text-sm font-bold flex items-center">
+                                            View <i class="fas fa-chevron-right ml-1 text-xs"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-gray-500 italic">No modules are currently available for this course.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Right Column: Mentorship matching info card -->
+            <div>
+                <div class="bg-gradient-to-br from-white to-gray-50 p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-6">
+                    <h3 class="text-xl font-bold text-primary-blue-dark mb-4 flex items-center">
+                        <i class="fas fa-user-friends mr-2 text-primary-gold"></i> Included Mentorship
+                    </h3>
+                    <p class="text-gray-600 text-sm leading-relaxed mb-4">
+                        We believe that knowledge should be accompanied by guidance. When you enroll in this course:
+                    </p>
+                    
+                    <ul class="space-y-3 text-sm text-gray-700">
+                        <li class="flex items-start">
+                            <span class="text-emerald-500 mr-2"><i class="fas fa-check-circle"></i></span>
+                            <span>Matched immediately with a mentor matching your interest profile & gender choice.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-emerald-500 mr-2"><i class="fas fa-check-circle"></i></span>
+                            <span>Direct email channel to seek counsel, clarify doubts, and ask questions.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-emerald-500 mr-2"><i class="fas fa-check-circle"></i></span>
+                            <span>Personalized feedback on assessment answers where applicable.</span>
+                        </li>
+                    </ul>
+
+                    <div class="mt-6 pt-6 border-t border-gray-100 text-center">
+                        <span class="text-xs text-gray-500 uppercase tracking-widest block mb-2">Host Platform</span>
+                        <img src="{% static 'icons/church-arise-network-blue.svg' %}" class="h-14 mx-auto" alt="Church Arise Network">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock body %}

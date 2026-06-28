@@ -44,6 +44,16 @@
                         class="block py-2 px-3 uppercase rounded {% if request.path == '/publications/' %} {{current_page_classes}} {% else %} {{non_current_page_classes}} {% endif %}">PUBLICATIONS</a>
                 </li>
                 <li>
+                    <a href="{% url 'course:course_list' %}"
+                        class="block py-2 px-3 uppercase rounded {% if 'courses' in request.path and 'dashboard' not in request.path %} {{current_page_classes}} {% else %} {{non_current_page_classes}} {% endif %}">COURSES</a>
+                </li>
+                {% if request.user.is_authenticated %}
+                <li>
+                    <a href="{% url 'course:dashboard' %}"
+                        class="block py-2 px-3 uppercase rounded {% if 'dashboard' in request.path %} {{current_page_classes}} {% else %} {{non_current_page_classes}} {% endif %}">DASHBOARD</a>
+                </li>
+                {% endif %}
+                <li>
                     {% if request.user.is_authenticated %}
                     <a href="/logout"
                     class="block py-2 px-3 uppercase rounded {% if request.path == '/logout' %} {{current_page_classes}} {% else %} {{non_current_page_classes}} {% endif %}">LOGOUT</a>

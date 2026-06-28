@@ -3,43 +3,139 @@
 <title>Signup</title>
 {% endblock head %} {% block body %}
 
-<div class="container mt-5">
-    <!-- Header -->
-    <!-- <header class="text-center">
-        <h1 class="display-4"><i class="fas fa-fire mr-3"></i> Sign Up</h1>
-    </header> -->
+<div class="container mx-auto px-4 mt-5">
+    <div class="signup-form-container bg-white p-6 md:p-10 rounded-2xl shadow-xl border border-gray-100 my-10">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold md:text-4xl text-primary-blue-dark">
+                Create Your Account
+            </h1>
+            <p class="text-gray-500 mt-2">Join Church Arise Network and start your journey</p>
+        </header>
 
-    <header class="text-center py-4 pt-16">
-        <h1 class="text-4xl md:font-normal md:text-6xl text-primary-blue">
-            Sign Up
-        </h1>
-    </header>
+        <!-- Form Section -->
+        <form class="signup-form" action="{% url 'register' %}" method="post">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div class="mb-6 p-4 text-sm text-red-800 bg-red-50 rounded-lg border border-red-200" role="alert">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
 
-    <!-- Form Section -->
+            <!-- Row 1: First Name & Last Name -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+                <div class="fieldWrapper">
+                    {{ form.first_name.label_tag }}
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                    <div class="text-danger text-sm mb-3">{{ form.first_name.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="fieldWrapper">
+                    {{ form.last_name.label_tag }}
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                    <div class="text-danger text-sm mb-3">{{ form.last_name.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
 
-    <form action="{% url 'register' %}" method="post">
-        {% csrf_token %} {% for field in form %}
-        <div class="fieldWrapper mb-2">
-            {{ field.label_tag }} {{ field }}
-            <p class="text-danger">{{ field.errors }}</p>
+            <!-- Row 2: Email & Gender -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+                <div class="fieldWrapper">
+                    {{ form.email.label_tag }}
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <div class="text-danger text-sm mb-3">{{ form.email.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="fieldWrapper">
+                    {{ form.gender.label_tag }}
+                    {{ form.gender }}
+                    {% if form.gender.errors %}
+                    <div class="text-danger text-sm mb-3">{{ form.gender.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Row 3: Mentorship Focus Area (Interests) -->
+            <div class="fieldWrapper">
+                {{ form.interests.label_tag }}
+                {{ form.interests }}
+                {% if form.interests.errors %}
+                <div class="text-danger text-sm mb-3">{{ form.interests.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Row 4: Occupation & Location -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+                <div class="fieldWrapper">
+                    {{ form.occupation.label_tag }}
+                    {{ form.occupation }}
+                    {% if form.occupation.errors %}
+                    <div class="text-danger text-sm mb-3">{{ form.occupation.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="fieldWrapper">
+                    {{ form.location.label_tag }}
+                    {{ form.location }}
+                    {% if form.location.errors %}
+                    <div class="text-danger text-sm mb-3">{{ form.location.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Row 5: Password & Confirm Password -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+                <div class="fieldWrapper">
+                    {{ form.password1.label_tag }}
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                    <div class="text-danger text-sm mb-3">{{ form.password1.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="fieldWrapper">
+                    {{ form.password2.label_tag }}
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                    <div class="text-danger text-sm mb-3">{{ form.password2.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn-yellow-gradient w-full mt-4 font-semibold text-lg hover:shadow-lg transition duration-200">
+                Sign Up
+            </button>
+        </form>
+
+        <div class="mt-6 text-center text-sm text-gray-600">
+            Already have an account? 
+            <a href="{% url 'login' %}" class="text-primary-blue hover:underline font-semibold">Login here</a>
         </div>
-        {% endfor %}
-
-        <button type="submit" class="btn-yellow-gradient w-full">
-            Sign Up
-        </button>
-    </form>
-
-    <style>
-        ul.errorlist {
-            list-style-type: none;
-        }
-        ul.errorlist li {
-            color: #dc3545 !important;
-        }
-    </style>
-
-    <div style="margin-top: 100px"></div>
-
-    {% endblock body %}
+    </div>
 </div>
+
+<style>
+    .signup-form-container {
+        max-width: 768px;
+        margin: 0 auto;
+    }
+    form.signup-form {
+        max-width: 100% !important;
+        margin: 0;
+    }
+    ul.errorlist {
+        list-style-type: none;
+        padding-left: 0;
+        margin-top: 4px;
+    }
+    ul.errorlist li {
+        color: #dc3545 !important;
+        font-size: 0.875rem;
+    }
+</style>
+
+<div style="margin-top: 100px"></div>
+
+{% endblock body %}

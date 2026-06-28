@@ -10,6 +10,7 @@ urlpatterns = [
     path("", include('main.urls')),
     path("", include('user_authentication.urls')),
     path("publications/", include('publication.urls')),
+    path("courses/", include('course.urls')),
     path("__reload__/", include("django_browser_reload.urls")),
     path("deploy/", deploy),
 ]

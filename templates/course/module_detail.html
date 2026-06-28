@@ -1,0 +1,207 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block head %}
+    <title>{{ module.title }} - {{ course.title }}</title>
+    <!-- Font Awesome (in case layout.html has older/different version, ensure it works) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock head %}
+
+{% block body %}
+<div class="bg-gray-100 min-h-screen">
+    <!-- Breadcrumb Header -->
+    <div class="bg-primary-blue-dark text-white py-4 shadow-sm">
+        <div class="container max-w-6xl mx-auto px-4 flex flex-wrap justify-between items-center gap-2">
+            <div class="text-sm font-semibold tracking-wide flex items-center">
+                <a href="{% url 'course:dashboard' %}" class="hover:text-primary-gold"><i class="fas fa-home mr-1"></i> Dashboard</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="{% url 'course:course_detail' course_id=course.id %}" class="hover:text-primary-gold">{{ course.title }}</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-300">Module {{ module.order }}</span>
+            </div>
+            <a href="{% url 'course:dashboard' %}" class="text-xs bg-primary-blue hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded transition">
+                <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <main class="container max-w-6xl mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Side: Syllabus Navigation (sticky) -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden sticky top-4">
+                    <div class="bg-gray-50 p-4 border-b border-gray-250 flex items-center justify-between">
+                        <h3 class="font-extrabold text-primary-blue-dark text-lg"><i class="fas fa-list-ol mr-2 text-primary-gold"></i> Modules</h3>
+                    </div>
+                    <div class="divide-y divide-gray-150 max-h-[60vh] overflow-y-auto">
+                        {% for m in modules %}
+                            <a href="{% url 'course:module_detail' course_id=course.id module_id=m.id %}" 
+                               class="flex items-center space-x-3 p-4 text-sm font-medium transition-colors hover:bg-gray-50 block {% if m.id == module.id %} bg-blue-50 text-primary-blue border-l-4 border-primary-blue {% else %} text-gray-700 {% endif %}">
+                                
+                                <!-- Checked Indicator -->
+                                {% if m.completed %}
+                                    <span class="w-6 h-6 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-600 flex items-center justify-center flex-shrink-0 text-xs font-bold shadow-sm">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                {% else %}
+                                    <span class="w-6 h-6 rounded-full bg-gray-100 border border-gray-300 text-gray-400 flex items-center justify-center flex-shrink-0 text-xs font-bold">
+                                        {{ m.order }}
+                                    </span>
+                                {% endif %}
+                                
+                                <span class="flex-grow truncate {% if m.id == module.id %} font-bold text-primary-blue-dark {% endif %}">
+                                    {{ m.title }}
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Content Area -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Main module content card -->
+                <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden p-6 md:p-8 space-y-6">
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">Module {{ module.order }}: {{ module.title }}</h2>
+                    
+                    <!-- YouTube Video Iframe -->
+                    {% if youtube_id %}
+                        <div class="aspect-video w-full rounded-xl overflow-hidden shadow-md border bg-black">
+                            <iframe class="w-full h-full" 
+                                    src="https://www.youtube.com/embed/{{ youtube_id }}" 
+                                    title="{{ module.title }}" 
+                                    frameborder="0" 
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                    referrerpolicy="strict-origin-when-cross-origin" 
+                                    allowfullscreen>
+                            </iframe>
+                        </div>
+                    {% else %}
+                        <div class="bg-gray-150 p-4 rounded-xl text-center text-gray-500 italic">
+                            <i class="fas fa-video-slash mr-2 text-2xl"></i> No video presentation is available for this module
+                        </div>
+                    {% endif %}
+
+                    <!-- WYSIWYG Content text -->
+                    <div class="prose max-w-none text-gray-700 leading-relaxed pt-4 border-t border-gray-100">
+                        {{ module.content|safe }}
+                    </div>
+                </div>
+
+                <!-- Assessment / Completion card -->
+                <div class="bg-white rounded-xl shadow-md border border-gray-100 p-6 md:p-8">
+                    {% if assessment %}
+                        <div class="space-y-6">
+                            <div class="flex items-center justify-between border-b pb-3">
+                                <h3 class="text-xl font-bold text-primary-blue-dark flex items-center">
+                                    <i class="fas fa-file-signature mr-2 text-primary-gold"></i> Module Assessment
+                                </h3>
+                                <span class="bg-blue-100 text-primary-blue text-xs font-bold px-2.5 py-1 rounded">Passing score: {{ assessment.passing_score }}%</span>
+                            </div>
+
+                            {% if assessment_passed %}
+                                <!-- Passed status banner -->
+                                <div class="bg-emerald-50 border border-emerald-250 p-6 rounded-xl text-center">
+                                    <div class="text-5xl text-emerald-500 mb-3"><i class="fas fa-check-circle"></i></div>
+                                    <h4 class="text-lg font-bold text-emerald-800 mb-1">Assessment Passed!</h4>
+                                    <p class="text-emerald-700 text-sm mb-4">Your score: {{ last_submission.score|floatformat:1 }}%</p>
+                                    
+                                    {% if next_module %}
+                                        <a href="{% url 'course:module_detail' course_id=course.id module_id=next_module.id %}" class="btn-yellow-gradient font-bold shadow-md inline-flex items-center text-sm">
+                                            Proceed to Next Module <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                                        </a>
+                                    {% else %}
+                                        <div class="bg-primary-gold-light border border-yellow-300 text-primary-blue-dark p-3 rounded-lg text-sm inline-block">
+                                            <i class="fas fa-award mr-1"></i> You have completed the final module of this course!
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <!-- Previous failure message if exists -->
+                                {% if last_submission %}
+                                    <div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg text-sm flex items-center space-x-2">
+                                        <i class="fas fa-circle-exclamation text-lg"></i>
+                                        <span>Your last submission scored <strong>{{ last_submission.score|floatformat:1 }}%</strong> which did not pass. You can try again.</span>
+                                    </div>
+                                {% endif %}
+
+                                <!-- Questions Form -->
+                                <form action="{% url 'course:submit_assessment' course_id=course.id module_id=module.id %}" method="post" class="space-y-6">
+                                    {% csrf_token %}
+                                    
+                                    {% for question in assessment.questions.all %}
+                                        <div class="space-y-3 p-4 rounded-xl bg-gray-50 border border-gray-150">
+                                            <span class="text-xs font-bold text-gray-500 uppercase tracking-wide">Question {{ forloop.counter }}</span>
+                                            <p class="font-semibold text-gray-900 text-base">{{ question.question_text }}</p>
+                                            
+                                            {% if question.question_type == 'MCQ' %}
+                                                <!-- Multiple Choice choices -->
+                                                <div class="grid grid-cols-1 gap-2 pt-2">
+                                                    {% for choice in question.choices.all %}
+                                                        <label class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 bg-white hover:bg-blue-50 cursor-pointer transition select-none">
+                                                            <input type="radio" name="question_{{ question.id }}" value="{{ choice.id }}" class="text-primary-blue focus:ring-primary-blue" required>
+                                                            <span class="text-sm text-gray-800">{{ choice.choice_text }}</span>
+                                                        </label>
+                                                    {% endfor %}
+                                                </div>
+                                            {% else %}
+                                                <!-- TEXT field area -->
+                                                <textarea name="question_{{ question.id }}" rows="4" class="w-full form-control" placeholder="Write your reflection answer here..." required></textarea>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+
+                                    <button type="submit" class="w-full btn-yellow-gradient font-bold shadow-lg transition-transform hover:scale-[1.01]">
+                                        Submit Assessment answers <i class="fas fa-paper-plane ml-2 text-xs"></i>
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <!-- Modules without assessments -->
+                        <div class="text-center py-4">
+                            <h3 class="text-lg font-bold text-gray-800 mb-2">Ready to complete this module?</h3>
+                            <p class="text-gray-500 text-sm mb-6">Review the lecture text and presentation content. Once you're done, mark it finished.</p>
+                            
+                            {% if module.completed %}
+                                <div class="bg-emerald-50 border border-emerald-250 p-4 rounded-xl inline-block mb-4">
+                                    <p class="text-emerald-800 text-sm font-bold"><i class="fas fa-check-circle mr-1"></i> Module Completed!</p>
+                                </div>
+                                {% if next_module %}
+                                    <div class="block">
+                                        <a href="{% url 'course:module_detail' course_id=course.id module_id=next_module.id %}" class="btn-yellow-gradient font-bold shadow-md inline-flex items-center text-sm">
+                                            Proceed to Next Module <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                <form action="{% url 'course:complete_module' course_id=course.id module_id=module.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-yellow-gradient font-bold shadow-lg">
+                                        Mark Module as Completed <i class="fas fa-check-circle ml-2 text-xs"></i>
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<style>
+    /* Styling to make sure WYSIWYG text rendered cleanly */
+    .prose h1 { font-size: 1.8em; font-weight: bold; margin-bottom: 0.5em; color: rgb(41,40,93); }
+    .prose h2 { font-size: 1.5em; font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; color: rgb(41,40,93); }
+    .prose h3 { font-size: 1.25em; font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; color: rgb(41,40,93); }
+    .prose p { margin-bottom: 1em; line-height: 1.6; }
+    .prose ul, .prose ol { margin-left: 1.5em; margin-bottom: 1em; list-style-type: unset; }
+    .prose li { margin-bottom: 0.5em; }
+    .prose a { color: rgb(70,155,216); text-decoration: underline; }
+    .prose a:hover { color: rgb(41,40,93); }
+</style>
+{% endblock body %}

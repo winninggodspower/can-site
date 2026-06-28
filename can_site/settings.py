@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "main",
     "user_authentication",
     "publication",
+    "course",
     "django_browser_reload",
 ]
 
