@@ -27,17 +27,27 @@ class ModuleInline(StackedInline):
     model = Module
     extra = 1
     fields = ('title', 'order', 'youtube_link', 'content')
+    class Media:
+        js = (
+            'https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js',
+            'js/admin_ckeditor.js',
+        )
 
 class CourseAdmin(ModelAdmin):
     list_display = ('title', 'created_at')
     inlines = [ModuleInline]
+    class Media:
+        js = (
+            'https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js',
+            'js/admin_ckeditor.js',
+        )
 
 class ModuleAdmin(ModelAdmin):
     list_display = ('title', 'course', 'order')
     list_filter = ('course',)
     class Media:
         js = (
-            'https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js',
+            'https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js',
             'js/admin_ckeditor.js',
         )
 
