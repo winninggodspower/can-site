@@ -1,37 +1,38 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin, TabularInline, StackedInline
 from .models import (
     Mentor, Course, Module, Assessment,
     AssessmentQuestion, AssessmentChoice,
     CourseEnrollment, ModuleProgress, AssessmentSubmission
 )
 
-class AssessmentChoiceInline(admin.TabularInline):
+class AssessmentChoiceInline(TabularInline):
     model = AssessmentChoice
     extra = 4
 
-class AssessmentQuestionAdmin(admin.ModelAdmin):
+class AssessmentQuestionAdmin(ModelAdmin):
     list_display = ('question_text', 'assessment', 'question_type')
     list_filter = ('assessment', 'question_type')
     inlines = [AssessmentChoiceInline]
 
-class AssessmentQuestionInline(admin.StackedInline):
+class AssessmentQuestionInline(StackedInline):
     model = AssessmentQuestion
     extra = 1
 
-class AssessmentAdmin(admin.ModelAdmin):
+class AssessmentAdmin(ModelAdmin):
     list_display = ('title', 'module', 'passing_score')
     inlines = [AssessmentQuestionInline]
 
-class ModuleInline(admin.StackedInline):
+class ModuleInline(StackedInline):
     model = Module
     extra = 1
     fields = ('title', 'order', 'youtube_link', 'content')
 
-class CourseAdmin(admin.ModelAdmin):
+class CourseAdmin(ModelAdmin):
     list_display = ('title', 'created_at')
     inlines = [ModuleInline]
 
-class ModuleAdmin(admin.ModelAdmin):
+class ModuleAdmin(ModelAdmin):
     list_display = ('title', 'course', 'order')
     list_filter = ('course',)
     class Media:
@@ -40,13 +41,21 @@ class ModuleAdmin(admin.ModelAdmin):
             'js/admin_ckeditor.js',
         )
 
-class MentorAdmin(admin.ModelAdmin):
+class MentorAdmin(ModelAdmin):
     list_display = ('name', 'email', 'gender', 'expertise', 'max_mentees')
     list_filter = ('gender', 'expertise')
 
-class CourseEnrollmentAdmin(admin.ModelAdmin):
+class CourseEnrollmentAdmin(ModelAdmin):
     list_display = ('user', 'course', 'mentor', 'enrolled_at')
     list_filter = ('course', 'mentor')
+
+class ModuleProgressAdmin(ModelAdmin):
+    list_display = ('user', 'module', 'completed', 'completed_at')
+    list_filter = ('completed', 'module__course')
+
+class AssessmentSubmissionAdmin(ModelAdmin):
+    list_display = ('user', 'assessment', 'score', 'passed', 'submitted_at')
+    list_filter = ('passed', 'assessment__module__course')
 
 admin.site.register(Mentor, MentorAdmin)
 admin.site.register(Course, CourseAdmin)
@@ -54,5 +63,6 @@ admin.site.register(Module, ModuleAdmin)
 admin.site.register(Assessment, AssessmentAdmin)
 admin.site.register(AssessmentQuestion, AssessmentQuestionAdmin)
 admin.site.register(CourseEnrollment, CourseEnrollmentAdmin)
-admin.site.register(ModuleProgress)
-admin.site.register(AssessmentSubmission)
+admin.site.register(ModuleProgress, ModuleProgressAdmin)
+admin.site.register(AssessmentSubmission, AssessmentSubmissionAdmin)
+

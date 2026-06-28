@@ -35,6 +35,10 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
+    "unfold",
+    "unfold.contrib.filters",
+    "unfold.contrib.forms",
+    "unfold.contrib.inlines",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -160,3 +164,15 @@ SITE_NAME = 'churcharisenetwork.com.ng'
 DEPLOY_SECRET = os.environ.get('DEPLOY_SECRET') 
 PROJECT_PATH = os.environ.get('PROJECT_PATH') 
 VENV_PATH = os.environ.get('PROJECT_PATH')
+
+# Django Unfold configuration
+UNFOLD = {
+    "SITE_TITLE": "Church Arise Network Admin",
+    "SITE_HEADER": "Church Arise Network",
+    "SITE_SUBHEADER": "Management Dashboard",
+    "SHOW_HISTORY": True,
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": True,
+    },
+}
