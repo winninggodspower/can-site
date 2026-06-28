@@ -8,7 +8,9 @@ window.addEventListener('load', function() {
 
         function initCKEditor(element) {
             if (element && !element.classList.contains('ckeditor-initialized') && !element.id.includes('__prefix__')) {
-                CKEDITOR.replace(element.id);
+                CKEDITOR.replace(element.id, {
+                    versionCheck: false
+                });
                 element.classList.add('ckeditor-initialized');
             }
         }
