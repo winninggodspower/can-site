@@ -164,7 +164,7 @@ SITE_NAME = 'churcharisenetwork.com.ng'
 
 DEPLOY_SECRET = os.environ.get('DEPLOY_SECRET') 
 PROJECT_PATH = os.environ.get('PROJECT_PATH') 
-VENV_PATH = os.environ.get('PROJECT_PATH')
+VENV_PATH = os.environ.get('VENV_PATH')
 
 # Django Unfold configuration
 UNFOLD = {
