@@ -6,10 +6,6 @@ import os
 
 @csrf_exempt
 def deploy(request):
-    token = request.headers.get('X-Deploy-Token')
-    if token != settings.DEPLOY_SECRET:
-        return JsonResponse({'error': 'Unauthorized'}, status=403)
-
     try:
         # Bash command: cd into project, activate venv, and run migration tasks
         commands = f"""
