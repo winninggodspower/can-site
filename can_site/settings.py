@@ -186,3 +186,18 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
+
+# Auto-configure Cloudinary if environment variables are set (e.g. for Railway)
+if os.environ.get('CLOUDINARY_CLOUD_NAME'):
+    if "cloudinary_storage" not in INSTALLED_APPS:
+        idx = INSTALLED_APPS.index("django.contrib.staticfiles")
+        INSTALLED_APPS.insert(idx, "cloudinary_storage")
+    if "cloudinary" not in INSTALLED_APPS:
+        INSTALLED_APPS.append("cloudinary")
+
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+        'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+        'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+    }
+    STORAGES["default"]["BACKEND"] = "cloudinary_storage.storage.MediaCloudinaryStorage"
