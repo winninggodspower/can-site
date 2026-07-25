@@ -15,8 +15,7 @@ def deploy(request):
         pip install -r requirements.txt &&
         python manage.py makemigrations &&
         python manage.py migrate &&
-        python manage.py collectstatic --noinput &&
-        cp -r {settings.PROJECT_PATH}/staticfiles/* {settings.PROJECT_PATH}/static/
+        python manage.py collectstatic --noinput
         """
         
         output = subprocess.check_output(commands, shell=True, stderr=subprocess.STDOUT)
