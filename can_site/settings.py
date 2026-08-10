@@ -54,6 +54,10 @@ INSTALLED_APPS = [
     "django_browser_reload",
 ]
 
+# remove django browser_reload from INSTALLED_APPS in production
+if not DEBUG:
+    INSTALLED_APPS.remove("django_browser_reload")
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
