@@ -29,6 +29,7 @@ ALLOWED_HOSTS = [
     'churcharisenetwork.com.ng.ushengineering.com',
     'churcharisenetworkintl.com.ng',
     'www.churcharisenetworkintl.com.ng',
+    'can-site.orzn.app',
 ]
 
 
@@ -200,4 +201,4 @@ if os.environ.get('CLOUDINARY_CLOUD_NAME'):
         'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
         'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
     }
-    STORAGES["default"]["BACKEND"] = "cloudinary_storage.storage.MediaCloudinaryStorage"
+    STORAGES["default"]["BACKEND"] = "cloudinary_storage.storage.MediaCloudinaryStorage"
