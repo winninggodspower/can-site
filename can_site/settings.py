@@ -30,6 +30,7 @@ ALLOWED_HOSTS = [
     'churcharisenetworkintl.com.ng',
     'www.churcharisenetworkintl.com.ng',
     'can-site.orzn.app',
+    'can-site.apps.orizon.ng',
 ]
 
 
