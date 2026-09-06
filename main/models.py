@@ -56,7 +56,7 @@ class Publication(models.Model):
     description  = models.TextField()
     file         = models.FileField(upload_to='publication_files')
     price        = models.PositiveIntegerField(default=0)
-    uploadedAt   = models.DateTimeField(auto_now_add=True)
+    uploadedAt   = models.DateTimeField(auto_now_add=True, db_column='uploadedat')
 
     def __str__(self):
         return self.headline
