@@ -34,6 +34,13 @@ ALLOWED_HOSTS = [
     'can-site.apps.orizon.ng',
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://can-site.orzn.app",
+    "https://churcharisenetwork.com.ng",
+    "https://churcharisenetworkintl.com.ng",
+    "https://www.churcharisenetworkintl.com.ng",
+]
+
 
 # Application definition
 
