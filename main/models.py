@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from cloudinary_storage.storage import RawMediaCloudinaryStorage
 
 # Create your models here.
 class About(models.Model):
@@ -54,7 +55,10 @@ class Publication(models.Model):
     headline     = models.CharField(max_length=100)
     fontawesome_class      = models.CharField(max_length=50, default='fa-user-graduate')
     description  = models.TextField()
-    file         = models.FileField(upload_to='publication_files')
+    file         = models.FileField(
+        upload_to='publication_files',
+        storage=RawMediaCloudinaryStorage(),
+    )
     price        = models.PositiveIntegerField(default=0)
     uploadedAt   = models.DateTimeField(auto_now_add=True, db_column='uploadedat')
 
