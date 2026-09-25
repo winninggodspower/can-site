@@ -158,7 +158,7 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-MEDIA_URL = '/media/'
+MEDIA_URL = '/'
 MEDIA_ROOT = os.environ.get('MEDIA_ROOT') or BASE_DIR / 'media'
 
 # Default primary key field type
@@ -222,5 +222,6 @@ if os.environ.get('CLOUDINARY_CLOUD_NAME'):
         'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
         'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
         'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+        'PREFIX': '',
     }
     STORAGES["default"]["BACKEND"] = "cloudinary_storage.storage.MediaCloudinaryStorage"
