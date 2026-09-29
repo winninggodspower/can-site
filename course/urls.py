@@ -13,4 +13,6 @@ urlpatterns = [
     path('<int:course_id>/modules/<int:module_id>/', views.module_view, name='module_detail'),
     path('<int:course_id>/modules/<int:module_id>/complete/', views.complete_module_view, name='complete_module'),
     path('<int:course_id>/modules/<int:module_id>/submit_assessment/', views.submit_assessment_view, name='submit_assessment'),
+    path('<int:course_id>/certificate/', views.certificate_detail_view, name='certificate_detail'),
+    path('certificate/verify/<str:certificate_code>/', views.verify_certificate_view, name='verify_certificate'),
 ]

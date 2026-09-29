@@ -61,7 +61,25 @@
             </div>
 
             <!-- Right Side: Content Area -->
-            <div class="lg:col-span-2 space-y-8">
+            <div class="lg:col-span-2 space-y-6">
+                {% if certificate %}
+                    <!-- Congratulatory Certificate Banner -->
+                    <div class="bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 rounded-xl p-4 sm:p-5 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center space-x-3 text-center sm:text-left">
+                            <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-2xl flex-shrink-0 text-white">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-base sm:text-lg leading-tight">Course Completed &amp; Certificate Unlocked!</h3>
+                                <p class="text-xs text-yellow-100 mt-0.5">Congratulations! Your official Certificate of Completion is available.</p>
+                            </div>
+                        </div>
+                        <a href="{% url 'course:certificate_detail' course_id=course.id %}" class="px-5 py-2.5 bg-primary-blue-dark hover:bg-opacity-95 text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-md transition flex items-center flex-shrink-0">
+                            <i class="fas fa-award mr-2 text-primary-gold text-sm"></i> View Certificate
+                        </a>
+                    </div>
+                {% endif %}
+
                 <!-- Main module content card -->
                 <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden p-6 md:p-8 space-y-6">
                     <h2 class="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">Module {{ module.order }}: {{ module.title }}</h2>
@@ -113,8 +131,17 @@
                                             Proceed to Next Module <i class="fas fa-arrow-right ml-2 text-xs"></i>
                                         </a>
                                     {% else %}
-                                        <div class="bg-primary-gold-light border border-yellow-300 text-primary-blue-dark p-3 rounded-lg text-sm inline-block">
-                                            <i class="fas fa-award mr-1"></i> You have completed the final module of this course!
+                                        <div class="space-y-3">
+                                            <div class="bg-primary-gold-light border border-yellow-300 text-primary-blue-dark p-3 rounded-lg text-sm inline-block">
+                                                <i class="fas fa-award mr-1"></i> You have completed the final module of this course!
+                                            </div>
+                                            {% if certificate %}
+                                                <div class="block">
+                                                    <a href="{% url 'course:certificate_detail' course_id=course.id %}" class="px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-bold rounded-xl text-sm shadow-lg hover:shadow-xl transition inline-flex items-center">
+                                                        <i class="fas fa-award mr-2 text-lg"></i> View Your Certificate of Completion
+                                                    </a>
+                                                </div>
+                                            {% endif %}
                                         </div>
                                     {% endif %}
                                 </div>
@@ -175,6 +202,14 @@
                                             Proceed to Next Module <i class="fas fa-arrow-right ml-2 text-xs"></i>
                                         </a>
                                     </div>
+                                {% else %}
+                                    {% if certificate %}
+                                        <div class="block">
+                                            <a href="{% url 'course:certificate_detail' course_id=course.id %}" class="px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-bold rounded-xl text-sm shadow-lg hover:shadow-xl transition inline-flex items-center">
+                                                <i class="fas fa-award mr-2 text-lg"></i> View Your Certificate of Completion
+                                            </a>
+                                        </div>
+                                    {% endif %}
                                 {% endif %}
                             {% else %}
                                 <form action="{% url 'course:complete_module' course_id=course.id module_id=module.id %}" method="post">

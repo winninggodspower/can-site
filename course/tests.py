@@ -7,7 +7,7 @@ from course.models import (
     Mentor, Course, Module, Assessment,
     AssessmentQuestion, AssessmentChoice,
     CourseEnrollment, ModuleProgress, AssessmentSubmission,
-    CoursePayment
+    CoursePayment, Certificate
 )
 
 class CoursePlatformTestCase(TestCase):
@@ -242,3 +242,112 @@ class CoursePlatformTestCase(TestCase):
         self.assertIsNotNone(enrollment)
         # Should be matched with male spiritual mentor (Brother John)
         self.assertEqual(enrollment.mentor, self.mentor_male_spiritual)
+
+    def test_certificate_unlocked_on_course_completion(self):
+        # 1. Create a 2-module course
+        course = Course.objects.create(
+            title="Spiritual Warfare Mastery",
+            description="Deep understanding of spiritual warfare."
+        )
+        mod1 = Module.objects.create(
+            course=course,
+            title="Module 1: Principles",
+            order=1,
+            content="Module 1 Content"
+        )
+        mod2 = Module.objects.create(
+            course=course,
+            title="Module 2: Practical Application",
+            order=2,
+            content="Module 2 Content"
+        )
+        # mod2 has an assessment
+        assess2 = Assessment.objects.create(
+            module=mod2,
+            title="Final Assessment",
+            passing_score=80
+        )
+        q = AssessmentQuestion.objects.create(
+            assessment=assess2,
+            question_text="Are we victorious?",
+            question_type="MCQ"
+        )
+        correct_choice = AssessmentChoice.objects.create(
+            question=q,
+            choice_text="Yes, through Christ",
+            is_correct=True
+        )
+
+        user = User.objects.create_user(
+            username="completer@example.com",
+            email="completer@example.com",
+            first_name="Grace",
+            last_name="Faith"
+        )
+        UserProfile.objects.create(user=user, gender="F", interests="SPIRITUAL")
+        CourseEnrollment.objects.create(user=user, course=course)
+        self.client.force_login(user)
+
+        # Complete Module 1 (non-assessment)
+        resp1 = self.client.post(f'/courses/{course.id}/modules/{mod1.id}/complete/')
+        # Should redirect to next module because module 2 is not completed
+        self.assertRedirects(resp1, f'/courses/{course.id}/modules/{mod2.id}/')
+        
+        # Verify certificate is NOT unlocked yet
+        self.assertFalse(Certificate.objects.filter(user=user, course=course).exists())
+
+        # Complete Module 2 by passing the assessment
+        resp2 = self.client.post(
+            f'/courses/{course.id}/modules/{mod2.id}/submit_assessment/',
+            {f'question_{q.id}': correct_choice.id}
+        )
+        # Should redirect to certificate detail since all modules are now completed!
+        self.assertRedirects(resp2, f'/courses/{course.id}/certificate/')
+
+        # Verify certificate is unlocked
+        cert = Certificate.objects.filter(user=user, course=course).first()
+        self.assertIsNotNone(cert)
+        self.assertTrue(cert.certificate_code.startswith("CAN-"))
+
+        # Access certificate view as the owner
+        cert_view_resp = self.client.get(f'/courses/{course.id}/certificate/')
+        self.assertEqual(cert_view_resp.status_code, 200)
+        self.assertContains(cert_view_resp, "Grace Faith")
+        self.assertContains(cert_view_resp, "Spiritual Warfare Mastery")
+        self.assertContains(cert_view_resp, cert.certificate_code)
+
+        # Public verification view
+        verify_resp = self.client.get(f'/courses/certificate/verify/{cert.certificate_code}/')
+        self.assertEqual(verify_resp.status_code, 200)
+        self.assertContains(verify_resp, "Grace Faith")
+        self.assertContains(verify_resp, "Authenticated Credential")
+
+        # Dashboard shows unlocked certificate and certificate section
+        dash_resp = self.client.get('/courses/dashboard/')
+        self.assertEqual(dash_resp.status_code, 200)
+        self.assertContains(dash_resp, "Certificate Unlocked")
+        self.assertContains(dash_resp, "My Earned Certificates")
+
+    def test_certificate_locked_for_uncompleted_user(self):
+        course = Course.objects.create(
+            title="Basic Theology",
+            description="Foundation of Faith."
+        )
+        Module.objects.create(
+            course=course,
+            title="Module 1: Theology 101",
+            order=1,
+            content="Content"
+        )
+
+        user = User.objects.create_user(username="incomplete@example.com", email="incomplete@example.com")
+        UserProfile.objects.create(user=user, gender="M", interests="SPIRITUAL")
+        CourseEnrollment.objects.create(user=user, course=course)
+        self.client.force_login(user)
+
+        # User has NOT completed module 1
+        resp = self.client.get(f'/courses/{course.id}/certificate/')
+        # Should redirect to course detail with warning message
+        self.assertRedirects(resp, f'/courses/{course.id}/')
+        self.assertFalse(Certificate.objects.filter(user=user, course=course).exists())
+

@@ -4,7 +4,7 @@ from .models import (
     Mentor, Course, Module, Assessment,
     AssessmentQuestion, AssessmentChoice,
     CourseEnrollment, ModuleProgress, AssessmentSubmission,
-    CoursePayment
+    CoursePayment, Certificate
 )
 
 class AssessmentChoiceInline(TabularInline):
@@ -84,4 +84,12 @@ class CoursePaymentAdmin(ModelAdmin):
     list_filter = ('approved', 'course')
 
 admin.site.register(CoursePayment, CoursePaymentAdmin)
+
+class CertificateAdmin(ModelAdmin):
+    list_display = ('certificate_code', 'user', 'course', 'issued_at')
+    search_fields = ('certificate_code', 'user__username', 'user__first_name', 'user__last_name', 'course__title')
+    list_filter = ('course', 'issued_at')
+    readonly_fields = ('certificate_code', 'issued_at')
+
+admin.site.register(Certificate, CertificateAdmin)
 

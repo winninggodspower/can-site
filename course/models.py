@@ -165,3 +165,48 @@ class CoursePayment(models.Model):
 
     def __str__(self):
         return f"{self.user.username} paid {self.amount} for {self.course.title} - Approved: {self.approved}"
+
+class Certificate(models.Model):
+    certificate_code = models.CharField(max_length=64, unique=True, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='certificates')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='certificates')
+    issued_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'course')
+        ordering = ['-issued_at']
+
+    def __str__(self):
+        return f"Certificate for {self.user.get_full_name() or self.user.username} - {self.course.title} ({self.certificate_code})"
+
+    def save(self, *args, **kwargs):
+        if not self.certificate_code:
+            import uuid
+            self.certificate_code = f"CAN-{uuid.uuid4().hex[:10].upper()}"
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def check_and_unlock(cls, user, course):
+        """
+        Unlocks and returns (certificate, newly_created) if the user has completed all modules in the course.
+        Returns (None, False) if the course has no modules or not all modules are completed.
+        """
+        if not user or not user.is_authenticated:
+            return None, False
+
+        total_modules = course.modules.count()
+        if total_modules == 0:
+            return None, False
+
+        completed_count = ModuleProgress.objects.filter(
+            user=user,
+            module__course=course,
+            completed=True
+        ).count()
+
+        if completed_count >= total_modules:
+            cert, created = cls.objects.get_or_create(user=user, course=course)
+            return cert, created
+
+        return None, False
+

@@ -8,7 +8,8 @@ from main.Paystack import PayStack
 from .models import (
     Course, Module, Mentor, CourseEnrollment,
     ModuleProgress, Assessment, AssessmentQuestion,
-    AssessmentChoice, AssessmentSubmission, CoursePayment
+    AssessmentChoice, AssessmentSubmission, CoursePayment,
+    Certificate
 )
 
 def get_youtube_id(url):
@@ -42,16 +43,20 @@ def course_detail_view(request, course_id):
     
     is_enrolled = False
     has_paid = False
+    certificate = None
     if request.user.is_authenticated:
         is_enrolled = CourseEnrollment.objects.filter(user=request.user, course=course).exists()
         if course.is_paid:
             has_paid = CoursePayment.objects.filter(user=request.user, course=course, approved=True).exists()
+        if is_enrolled:
+            certificate, _ = Certificate.check_and_unlock(request.user, course)
 
     return render(request, 'course/course_detail.html', {
         'course': course,
         'modules': modules,
         'is_enrolled': is_enrolled,
         'has_paid': has_paid,
+        'certificate': certificate,
     })
 
 @login_required
@@ -85,7 +90,7 @@ def enroll_view(request, course_id):
 def dashboard_view(request):
     enrollments = CourseEnrollment.objects.filter(user=request.user).select_related('course', 'mentor')
     
-    # Calculate progress for each enrollment
+    # Calculate progress and certificate status for each enrollment
     for enrollment in enrollments:
         total_modules = enrollment.course.modules.count()
         completed_modules = ModuleProgress.objects.filter(
@@ -98,12 +103,23 @@ def dashboard_view(request):
         enrollment.completed_modules = completed_modules
         enrollment.total_modules = total_modules
 
+        # Check and unlock certificate if all modules completed
+        if total_modules > 0 and completed_modules >= total_modules:
+            cert, _ = Certificate.check_and_unlock(request.user, enrollment.course)
+            enrollment.certificate = cert
+        else:
+            enrollment.certificate = None
+
+    # Retrieve all certificates earned by the user
+    user_certificates = Certificate.objects.filter(user=request.user).select_related('course')
+
     # Recommended courses (not enrolled in)
     enrolled_ids = [e.course_id for e in enrollments]
     recommended_courses = Course.objects.exclude(id__in=enrolled_ids)[:3]
 
     return render(request, 'course/dashboard.html', {
         'enrollments': enrollments,
+        'certificates': user_certificates,
         'recommended_courses': recommended_courses,
     })
 
@@ -143,6 +159,11 @@ def module_view(request, course_id, module_id):
     # Find next module (for navigation link)
     next_module = enrollment.course.modules.filter(order__gt=module.order).order_by('order').first()
 
+    # Check certificate status
+    certificate = Certificate.objects.filter(user=request.user, course=enrollment.course).first()
+    if not certificate:
+        certificate, _ = Certificate.check_and_unlock(request.user, enrollment.course)
+
     return render(request, 'course/module_detail.html', {
         'course': enrollment.course,
         'module': module,
@@ -152,6 +173,7 @@ def module_view(request, course_id, module_id):
         'assessment_passed': assessment_passed,
         'last_submission': last_submission,
         'next_module': next_module,
+        'certificate': certificate,
     })
 
 @login_required
@@ -172,6 +194,15 @@ def submit_assessment_view(request, course_id, module_id):
             module=module,
             defaults={'completed': True, 'completed_at': timezone.now()}
         )
+        cert, created = Certificate.check_and_unlock(request.user, enrollment.course)
+        if cert:
+            if created:
+                messages.success(
+                    request,
+                    f"🎉 Congratulations! You have completed '{enrollment.course.title}' and unlocked your Certificate of Completion!"
+                )
+            return redirect('course:certificate_detail', course_id=course_id)
+
         messages.success(request, "Assessment submitted successfully!")
         return redirect('course:module_detail', course_id=course_id, module_id=module_id)
 
@@ -216,6 +247,20 @@ def submit_assessment_view(request, course_id, module_id):
             module=module,
             defaults={'completed': True, 'completed_at': timezone.now()}
         )
+        cert, created = Certificate.check_and_unlock(request.user, enrollment.course)
+        if cert:
+            if created:
+                messages.success(
+                    request,
+                    f"🎉 Congratulations! You passed the assessment with a score of {score:.1f}%, completed '{enrollment.course.title}', and unlocked your Certificate of Completion!"
+                )
+            else:
+                messages.success(
+                    request,
+                    f"Congratulations! You passed the assessment with a score of {score:.1f}%!"
+                )
+            return redirect('course:certificate_detail', course_id=course_id)
+
         messages.success(request, f"Congratulations! You passed the assessment with a score of {score:.1f}%!")
     else:
         messages.error(
@@ -235,6 +280,16 @@ def complete_module_view(request, course_id, module_id):
             module=module,
             defaults={'completed': True, 'completed_at': timezone.now()}
         )
+
+        cert, created = Certificate.check_and_unlock(request.user, enrollment.course)
+        if cert:
+            if created:
+                messages.success(
+                    request,
+                    f"🎉 Congratulations! You have finished all modules in '{enrollment.course.title}' and unlocked your Certificate of Completion!"
+                )
+            return redirect('course:certificate_detail', course_id=course_id)
+
         messages.success(request, f"Module '{module.title}' marked as completed!")
         
         # Redirect to next module if available
@@ -337,3 +392,50 @@ def verify_course_payment_view(request):
     else:
         messages.error(request, "Payment verification failed or was cancelled.")
         return redirect('course:course_list')
+
+@login_required
+def certificate_detail_view(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    cert = Certificate.objects.filter(user=request.user, course=course).first()
+    if not cert:
+        # Check if eligible to unlock
+        cert, _ = Certificate.check_and_unlock(request.user, course)
+
+    if not cert:
+        messages.warning(
+            request,
+            f"You haven't completed '{course.title}' yet. Complete all modules to unlock your certificate!"
+        )
+        return redirect('course:course_detail', course_id=course.id)
+
+    enrollment = CourseEnrollment.objects.filter(user=request.user, course=course).first()
+    mentor = enrollment.mentor if enrollment else None
+
+    # Determine recipient display name
+    full_name = request.user.get_full_name().strip()
+    recipient_name = full_name if full_name else (request.user.first_name or request.user.username)
+
+    return render(request, 'course/certificate_detail.html', {
+        'certificate': cert,
+        'course': course,
+        'mentor': mentor,
+        'recipient_name': recipient_name,
+        'is_owner': True,
+    })
+
+def verify_certificate_view(request, certificate_code):
+    cert = get_object_or_404(Certificate, certificate_code=certificate_code)
+    enrollment = CourseEnrollment.objects.filter(user=cert.user, course=cert.course).first()
+    mentor = enrollment.mentor if enrollment else None
+
+    full_name = cert.user.get_full_name().strip()
+    recipient_name = full_name if full_name else (cert.user.first_name or cert.user.username)
+
+    return render(request, 'course/certificate_detail.html', {
+        'certificate': cert,
+        'course': cert.course,
+        'mentor': mentor,
+        'recipient_name': recipient_name,
+        'is_public_view': True,
+    })
+

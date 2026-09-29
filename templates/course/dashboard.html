@@ -42,7 +42,14 @@
                                 <!-- Details -->
                                 <div class="p-6 md:w-2/3 flex flex-col justify-between">
                                     <div>
-                                        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ enrollment.course.title }}</h3>
+                                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                                            <h3 class="text-xl font-bold text-gray-900">{{ enrollment.course.title }}</h3>
+                                            {% if enrollment.certificate %}
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                                                    <i class="fas fa-award mr-1.5 text-amber-600"></i> Certificate Unlocked
+                                                </span>
+                                            {% endif %}
+                                        </div>
                                         <p class="text-gray-650 text-sm mb-4 line-clamp-2">{{ enrollment.course.description }}</p>
                                         
                                         <!-- Progress Bar -->
@@ -52,7 +59,7 @@
                                                 <span>{{ enrollment.progress_percent }}%</span>
                                             </div>
                                             <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                                <div class="bg-primary-gold h-2.5 rounded-full transition-all duration-500" style="width: {{ enrollment.progress_percent }}%"></div>
+                                                <div class="{% if enrollment.certificate %}bg-emerald-500{% else %}bg-primary-gold{% endif %} h-2.5 rounded-full transition-all duration-500" style="width: {{ enrollment.progress_percent }}%"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -77,14 +84,25 @@
                                             {% endif %}
                                         </div>
 
-                                        <!-- Resume Learning Link -->
-                                        <div>
-                                            {% if enrollment.course.modules.exists %}
-                                                <a href="{% url 'course:module_detail' course_id=enrollment.course.id module_id=enrollment.course.modules.first.id %}" class="inline-flex items-center justify-center btn-yellow-gradient w-full sm:w-auto text-sm font-bold shadow hover:shadow-md transition">
-                                                    Resume Learning <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                                        <!-- Action Buttons: Certificate vs Resume -->
+                                        <div class="flex flex-col sm:flex-row items-center gap-2">
+                                            {% if enrollment.certificate %}
+                                                <a href="{% url 'course:certificate_detail' course_id=enrollment.course.id %}" class="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white w-full sm:w-auto text-sm font-bold rounded-lg shadow-md hover:shadow-lg transition">
+                                                    <i class="fas fa-award mr-2"></i> View Certificate
                                                 </a>
+                                                {% if enrollment.course.modules.exists %}
+                                                    <a href="{% url 'course:module_detail' course_id=enrollment.course.id module_id=enrollment.course.modules.first.id %}" class="text-xs text-gray-500 hover:text-primary-blue underline py-1">
+                                                        Review Course
+                                                    </a>
+                                                {% endif %}
                                             {% else %}
-                                                <span class="text-xs text-gray-400 italic">No modules added yet</span>
+                                                {% if enrollment.course.modules.exists %}
+                                                    <a href="{% url 'course:module_detail' course_id=enrollment.course.id module_id=enrollment.course.modules.first.id %}" class="inline-flex items-center justify-center btn-yellow-gradient w-full sm:w-auto text-sm font-bold shadow hover:shadow-md transition">
+                                                        Resume Learning <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                                                    </a>
+                                                {% else %}
+                                                    <span class="text-xs text-gray-400 italic">No modules added yet</span>
+                                                {% endif %}
                                             {% endif %}
                                         </div>
                                     </div>
@@ -100,6 +118,39 @@
                         <a href="{% url 'course:course_list' %}" class="btn-yellow-gradient font-bold shadow-md">
                             Browse Courses
                         </a>
+                    </div>
+                {% endif %}
+
+                <!-- My Earned Certificates Section -->
+                {% if certificates %}
+                    <div class="mt-12">
+                        <h2 class="text-2xl font-bold text-primary-blue-dark border-b pb-3 mb-6 flex items-center">
+                            <i class="fas fa-award mr-3 text-amber-500"></i> My Earned Certificates
+                        </h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {% for cert in certificates %}
+                                <div class="bg-white p-5 rounded-xl border border-amber-200 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                                    <div class="flex items-start space-x-3 mb-4">
+                                        <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 text-xl border border-amber-200">
+                                            <i class="fas fa-certificate"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-gray-900 leading-snug">{{ cert.course.title }}</h4>
+                                            <p class="text-xs text-gray-500 mt-0.5">Issued: {{ cert.issued_at|date:"M d, Y" }}</p>
+                                            <p class="text-[11px] font-mono text-gray-400 mt-0.5">ID: {{ cert.certificate_code }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="pt-3 border-t border-gray-100 flex items-center justify-between">
+                                        <a href="{% url 'course:certificate_detail' course_id=cert.course.id %}" class="text-xs font-bold text-amber-700 hover:text-amber-800 flex items-center">
+                                            <i class="fas fa-eye mr-1"></i> View Certificate
+                                        </a>
+                                        <a href="{% url 'course:verify_certificate' certificate_code=cert.certificate_code %}" target="_blank" class="text-[11px] text-gray-400 hover:text-gray-600 flex items-center">
+                                            <i class="fas fa-external-link-alt mr-1"></i> Public Verification
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 {% endif %}
             </div>
