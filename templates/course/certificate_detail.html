@@ -2,86 +2,22 @@
 {% load static %}
 
 {% block head %}
-    <title>Certificate of Completion - {{ course.title }} - Church Arise Network</title>
-    <!-- Google Fonts for Stately Certificate Typography -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Great+Vibes&family=Playfair+Display:ital,wght@0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        .font-cinzel {
-            font-family: 'Cinzel', serif;
-        }
-        .font-playfair {
-            font-family: 'Playfair Display', Georgia, serif;
-        }
-        .font-signature {
-            font-family: 'Great Vibes', cursive;
-        }
-        
-        /* Subtle Guilloche / Academic Pattern Background */
-        .cert-pattern {
-            background-color: #fdfbf7;
-            background-image: 
-                radial-gradient(#d4af37 0.75px, transparent 0.75px),
-                radial-gradient(#1e1b4b 0.5px, #fdfbf7 0.5px);
-            background-size: 30px 30px;
-            background-position: 0 0, 15px 15px;
-            background-opacity: 0.05;
-        }
-
-        /* Certificate Double Border & Corner Ornaments */
-        .cert-frame {
-            border: 12px double #1e1b4b;
-            box-shadow: 
-                0 0 0 4px #eab308,
-                0 0 0 7px #1e1b4b,
-                0 25px 50px -12px rgba(30, 27, 75, 0.25);
-        }
-
-        /* Print Media Styling for Clean PDF / Paper Output */
-        @media print {
-            nav, footer, .no-print, .alert {
-                display: none !important;
-            }
-            body {
-                background: white !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            .cert-container {
-                padding: 0 !important;
-                margin: 0 !important;
-                max-width: 100% !important;
-                width: 100% !important;
-            }
-            .cert-frame {
-                border: 10px double #1e1b4b !important;
-                box-shadow: none !important;
-                page-break-inside: avoid !important;
-                width: 100% !important;
-                margin: 0 auto !important;
-            }
-            @page {
-                size: landscape;
-                margin: 0.8cm;
-            }
-        }
-    </style>
+    <title>Leadership Certificate - {{ recipient_name }} - Church Arise Network</title>
 {% endblock head %}
 
 {% block body %}
-<div class="bg-gray-100 min-h-screen py-10 px-4 sm:px-6 cert-container">
-    <!-- Action Toolbar (Hidden during Print) -->
-    <div class="max-w-5xl mx-auto mb-8 no-print">
+<div class="bg-gray-100 min-h-screen py-10 px-4 sm:px-6">
+    <!-- Action Toolbar -->
+    <div class="max-w-5xl mx-auto mb-8">
         <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-6 flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center text-2xl shadow-inner">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-inner border" style="background-color: #fef3c7; color: #d97706; border-color: #fde68a;">
                     <i class="fas fa-award"></i>
                 </div>
                 <div>
                     <h2 class="text-lg font-bold text-gray-900 leading-tight">
                         {% if is_public_view %}
-                            Verified Credential
+                            Verified Leadership Credential
                         {% else %}
                             Certificate Unlocked!
                         {% endif %}
@@ -92,148 +28,96 @@
                 </div>
             </div>
 
-            <!-- Buttons -->
-            <div class="flex flex-wrap items-center gap-3">
-                <button onclick="window.print()" class="inline-flex items-center px-4 py-2.5 bg-primary-blue-dark hover:bg-opacity-90 text-white rounded-xl text-sm font-semibold shadow transition-all hover:shadow-md">
-                    <i class="fas fa-print mr-2 text-primary-gold"></i> Print / Save as PDF
-                </button>
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap items-center" style="gap: 12px;">
+                <a href="{{ pdf_download_url }}" class="inline-flex items-center rounded-xl text-sm font-semibold shadow transition-all hover:opacity-90" style="background-color: #d97706; color: #ffffff; padding: 10px 18px; gap: 8px;">
+                    <i class="fas fa-download text-white" style="margin-right: 6px;"></i> Download Certificate
+                </a>
+                
+                <a href="{{ pdf_url }}" target="_blank" class="inline-flex items-center rounded-xl text-sm font-semibold shadow transition-all hover:opacity-90" style="background-color: #1e1b4b; color: #ffffff; padding: 10px 18px; gap: 8px;">
+                    <i class="fas fa-external-link-alt" style="color: #f59e0b; margin-right: 6px;"></i> Open Fullscreen
+                </a>
 
-                <button onclick="copyVerificationLink()" id="copyBtn" class="inline-flex items-center px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-semibold transition">
-                    <i class="fas fa-share-alt mr-2 text-primary-blue"></i> Share Link
+                <button onclick="copyVerificationLink()" id="copyBtn" class="inline-flex items-center rounded-xl text-sm font-semibold transition hover:bg-gray-200" style="background-color: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; padding: 10px 18px; gap: 8px;">
+                    <i class="fas fa-share-alt text-primary-blue" style="margin-right: 6px;"></i> Share Link
                 </button>
 
                 {% if user.is_authenticated %}
-                    <a href="{% url 'course:dashboard' %}" class="inline-flex items-center px-4 py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-xl text-sm font-semibold border border-gray-200 transition">
-                        <i class="fas fa-arrow-left mr-2"></i> Dashboard
+                    <a href="{% url 'course:dashboard' %}" class="inline-flex items-center rounded-xl text-sm font-semibold transition hover:bg-gray-100" style="background-color: #f9fafb; color: #4b5563; border: 1px solid #e5e7eb; padding: 10px 18px; gap: 8px;">
+                        <i class="fas fa-arrow-left" style="margin-right: 6px;"></i> Dashboard
                     </a>
                 {% endif %}
             </div>
         </div>
     </div>
 
-    <!-- Certificate Sheet -->
-    <div class="max-w-5xl mx-auto">
-        <div class="cert-frame bg-[#fdfbf7] p-8 sm:p-14 rounded-sm relative overflow-hidden text-center cert-pattern">
-            <!-- Decorative Corner Accents -->
-            <div class="absolute top-3 left-3 w-12 h-12 border-t-2 border-l-2 border-amber-600 pointer-events-none"></div>
-            <div class="absolute top-3 right-3 w-12 h-12 border-t-2 border-r-2 border-amber-600 pointer-events-none"></div>
-            <div class="absolute bottom-3 left-3 w-12 h-12 border-b-2 border-l-2 border-amber-600 pointer-events-none"></div>
-            <div class="absolute bottom-3 right-3 w-12 h-12 border-b-2 border-r-2 border-amber-600 pointer-events-none"></div>
-
-            <!-- Top Header Logo & Organization Title -->
-            <div class="mb-6">
-                <div class="inline-flex items-center justify-center space-x-3 mb-2">
-                    <img src="{% static 'icons/church-arise-network-blue.svg' %}" alt="CAN Emblem" class="w-12 h-12 sm:w-14 sm:h-14 object-contain">
-                    <div class="text-left">
-                        <h3 class="font-cinzel text-xl sm:text-2xl font-bold tracking-widest text-primary-blue-dark uppercase leading-none">
-                            Church Arise Network
-                        </h3>
-                        <p class="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.25em] text-amber-700 mt-1">
-                            Discipleship & Leadership Academy
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Certificate Title -->
-            <div class="my-6">
-                <div class="inline-block relative">
-                    <h1 class="font-cinzel text-2xl sm:text-4xl md:text-5xl font-extrabold uppercase tracking-widest text-[#1e1b4b] px-4 py-1">
-                        Certificate of Completion
-                    </h1>
-                    <div class="h-0.5 w-3/4 mx-auto bg-gradient-to-r from-transparent via-amber-500 to-transparent mt-2"></div>
-                </div>
-            </div>
-
-            <!-- Presentation Line -->
-            <p class="font-playfair italic text-gray-600 text-base sm:text-lg mb-4">
-                This is proudly presented to
-            </p>
-
-            <!-- Recipient Name -->
-            <div class="my-4 sm:my-6">
-                <div class="inline-block border-b-2 border-amber-600/70 pb-2 px-6 sm:px-12 min-w-[280px] sm:min-w-[420px]">
-                    <span class="font-playfair text-2xl sm:text-4xl md:text-5xl font-bold text-primary-blue-dark tracking-wide block">
-                        {{ recipient_name }}
+    <!-- CERTIFICATE SHOWCASE -->
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+            <!-- Viewer Control Header -->
+            <div class="px-4 sm:px-6 flex flex-wrap items-center justify-between gap-3" style="background-color: #1e1b4b; color: #ffffff; padding-top: 10px; padding-bottom: 10px;">
+                <div class="flex items-center" style="gap: 10px;">
+                    <span class="inline-flex items-center rounded-full font-bold shadow-sm" style="background-color: #f59e0b; color: #1e1b4b; padding: 3px 10px; font-size: 11px;">
+                        <i class="fas fa-certificate" style="margin-right: 5px; font-size: 11px;"></i> Leadership Certificate
+                    </span>
+                    <span class="text-xs text-gray-200 hidden sm:inline" style="font-size: 11px;">
+                        Recipient: <strong class="text-white">{{ recipient_name }}</strong>
                     </span>
                 </div>
-            </div>
 
-            <!-- Fulfillment Text -->
-            <p class="font-sans text-gray-700 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed mt-2 mb-6">
-                for having successfully completed all coursework, lectures, and practical assessments required for the curriculum of
-            </p>
+                <div class="flex items-center flex-wrap" style="gap: 8px;">
+                    <!-- Toggle between High-Res Image and Interactive PDF Viewer -->
+                    <button id="toggleViewerBtn" onclick="toggleViewerMode()" class="rounded-md transition inline-flex items-center hover:opacity-90" style="background-color: rgba(255,255,255,0.15); color: #ffffff; border: 1px solid rgba(255,255,255,0.25); padding: 5px 11px; font-size: 11.5px;">
+                        <i id="toggleViewerIcon" class="fas fa-file-pdf" style="color: #f59e0b; margin-right: 6px; font-size: 11px;"></i>
+                        <span id="toggleViewerText">Interactive PDF Viewer</span>
+                    </button>
+                    
+                    <a href="{{ pdf_url }}" target="_blank" class="rounded-md transition inline-flex items-center hover:opacity-90" style="background-color: rgba(255,255,255,0.15); color: #ffffff; border: 1px solid rgba(255,255,255,0.25); padding: 5px 11px; font-size: 11.5px;" title="Open full screen in new tab">
+                        <i class="fas fa-expand" style="color: #f59e0b; margin-right: 6px; font-size: 11px;"></i> Fullscreen
+                    </a>
 
-            <!-- Course Title -->
-            <div class="mb-10">
-                <h2 class="font-cinzel text-xl sm:text-2xl md:text-3xl font-bold text-amber-700 tracking-wide">
-                    {{ course.title }}
-                </h2>
-            </div>
-
-            <!-- Footer: Signatures & Gold Seal -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 items-end gap-6 sm:gap-4 mt-8 pt-6 border-t border-gray-250">
-                <!-- Mentor / Instructor Signature -->
-                <div class="text-center order-2 sm:order-1">
-                    <div class="h-12 flex items-center justify-center">
-                        <span class="font-signature text-2xl sm:text-3xl text-primary-blue-dark select-none">
-                            {% if mentor %}{{ mentor.name }}{% else %}CAN Directorate{% endif %}
-                        </span>
-                    </div>
-                    <div class="w-40 sm:w-48 mx-auto border-t border-gray-400 mt-1 pt-1">
-                        <p class="text-xs font-bold text-gray-800 uppercase tracking-wider">
-                            {% if mentor %}{{ mentor.name }}{% else %}Assigned Course Mentor{% endif %}
-                        </p>
-                        <p class="text-[10px] text-gray-500 uppercase tracking-widest">
-                            Course Mentor
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Center Official Seal -->
-                <div class="flex flex-col items-center justify-center order-1 sm:order-2">
-                    <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-dashed border-amber-600 bg-gradient-to-tr from-amber-50 to-amber-100 flex flex-col items-center justify-center shadow-lg p-2">
-                        <i class="fas fa-certificate text-3xl sm:text-4xl text-amber-500 mb-1"></i>
-                        <span class="text-[8px] sm:text-[9px] font-cinzel font-black uppercase text-amber-900 tracking-wider text-center leading-tight">
-                            Official Seal
-                        </span>
-                        <span class="text-[7px] font-sans font-bold text-amber-700 uppercase tracking-widest">
-                            Verified
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Dean / Leadership Signature -->
-                <div class="text-center order-3">
-                    <div class="h-12 flex items-center justify-center">
-                        <span class="font-signature text-2xl sm:text-3xl text-primary-blue-dark select-none">
-                            Church Arise Network
-                        </span>
-                    </div>
-                    <div class="w-40 sm:w-48 mx-auto border-t border-gray-400 mt-1 pt-1">
-                        <p class="text-xs font-bold text-gray-800 uppercase tracking-wider">
-                            Director of Training
-                        </p>
-                        <p class="text-[10px] text-gray-500 uppercase tracking-widest">
-                            CAN Executive Council
-                        </p>
-                    </div>
+                    <a href="{{ pdf_download_url }}" class="rounded-md font-bold transition inline-flex items-center shadow-sm hover:opacity-90" style="background-color: #d97706; color: #ffffff; padding: 5px 13px; font-size: 11.5px;">
+                        <i class="fas fa-download" style="color: #ffffff; margin-right: 6px; font-size: 11px;"></i> Download Certificate
+                    </a>
                 </div>
             </div>
 
-            <!-- Verification Metadata Bottom Bar -->
-            <div class="mt-10 pt-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between text-[11px] text-gray-500 gap-2">
-                <div>
-                    <span class="font-semibold text-gray-600">Issued On:</span> {{ certificate.issued_at|date:"F j, Y" }}
+            <!-- View A: High-Res Rendered Image (Default, universally visible & instant across all devices) -->
+            <div id="imageDisplayArea" class="p-4 sm:p-10 flex flex-col items-center justify-center" style="background-color: #f8fafc;">
+                <div class="relative bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200 max-w-2xl w-full">
+                    <img src="{{ preview_image_url }}" alt="Leadership Certificate for {{ recipient_name }}" class="w-full h-auto block select-none">
                 </div>
-                <div>
-                    <span class="font-semibold text-gray-600">Certificate ID:</span> 
-                    <span class="font-mono font-bold text-gray-800 tracking-wider">{{ certificate.certificate_code }}</span>
+                <div class="mt-6 flex flex-wrap items-center justify-center" style="gap: 14px; margin-top: 24px;">
+                    <a href="{{ pdf_download_url }}" class="inline-flex items-center rounded-xl text-xs font-bold shadow transition hover:opacity-90" style="background-color: #d97706; color: #ffffff; padding: 11px 22px;">
+                        <i class="fas fa-download" style="margin-right: 8px;"></i> Download Certificate
+                    </a>
+                    <a href="{{ pdf_url }}" target="_blank" class="inline-flex items-center rounded-xl text-xs font-semibold shadow transition hover:opacity-90" style="background-color: #1e1b4b; color: #ffffff; padding: 11px 22px;">
+                        <i class="fas fa-external-link-alt" style="color: #f59e0b; margin-right: 8px;"></i> Open Fullscreen
+                    </a>
                 </div>
-                <div>
-                    <span class="inline-flex items-center text-emerald-700 font-semibold">
-                        <i class="fas fa-check-circle mr-1 text-emerald-600"></i> Authenticated Credential
-                    </span>
+            </div>
+
+            <!-- View B: Interactive Embedded PDF Viewer -->
+            <div id="pdfDisplayArea" class="hidden w-full bg-gray-100" style="min-height: 850px;">
+                <iframe 
+                    id="certificateIframe"
+                    src="{{ pdf_url }}#toolbar=0&navpanes=0&view=FitH" 
+                    style="width: 100%; height: 850px; border: 0; background: white;"
+                    title="Leadership Certificate PDF for {{ recipient_name }}">
+                </iframe>
+            </div>
+
+            <!-- Bottom Verification Footer -->
+            <div class="bg-gray-50 px-4 sm:px-6 py-3.5 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-600 gap-2">
+                <div class="flex items-center space-x-2">
+                    <span class="font-semibold text-gray-800">Issued On:</span> {{ certificate.issued_at|date:"F j, Y" }}
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="font-semibold text-gray-800">Credential ID:</span>
+                    <span class="font-mono font-bold text-gray-900 bg-gray-200/80 px-2 py-0.5 rounded">{{ certificate.certificate_code }}</span>
+                </div>
+                <div class="text-emerald-700 font-semibold flex items-center">
+                    <i class="fas fa-shield-alt mr-1 text-emerald-600"></i> Digitally Signed & Authenticated
                 </div>
             </div>
         </div>
@@ -247,6 +131,33 @@
 </div>
 
 <script>
+let showingPdfMode = false;
+function toggleViewerMode() {
+    const pdfArea = document.getElementById('pdfDisplayArea');
+    const imageArea = document.getElementById('imageDisplayArea');
+    const toggleIcon = document.getElementById('toggleViewerIcon');
+    const toggleText = document.getElementById('toggleViewerText');
+
+    showingPdfMode = !showingPdfMode;
+    if (showingPdfMode) {
+        imageArea.classList.add('hidden');
+        pdfArea.classList.remove('hidden');
+        toggleIcon.className = 'fas fa-image';
+        toggleIcon.style.marginRight = '6px';
+        toggleIcon.style.fontSize = '11px';
+        toggleIcon.style.color = '#f59e0b';
+        toggleText.textContent = 'High-Res Image Mode';
+    } else {
+        pdfArea.classList.add('hidden');
+        imageArea.classList.remove('hidden');
+        toggleIcon.className = 'fas fa-file-pdf';
+        toggleIcon.style.marginRight = '6px';
+        toggleIcon.style.fontSize = '11px';
+        toggleIcon.style.color = '#f59e0b';
+        toggleText.textContent = 'Interactive PDF Viewer';
+    }
+}
+
 function copyVerificationLink() {
     const url = "{{ request.scheme }}://{{ request.get_host }}{% url 'course:verify_certificate' certificate_code=certificate.certificate_code %}";
     navigator.clipboard.writeText(url).then(function() {

@@ -1,7 +1,9 @@
 import re
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.contrib import messages
 from django.utils import timezone
 from main.Paystack import PayStack
@@ -397,6 +399,7 @@ def verify_course_payment_view(request):
 def certificate_detail_view(request, course_id):
     course = get_object_or_404(Course, pk=course_id)
     cert = Certificate.objects.filter(user=request.user, course=course).first()
+    
     if not cert:
         # Check if eligible to unlock
         cert, _ = Certificate.check_and_unlock(request.user, course)
@@ -415,12 +418,18 @@ def certificate_detail_view(request, course_id):
     full_name = request.user.get_full_name().strip()
     recipient_name = full_name if full_name else (request.user.first_name or request.user.username)
 
+    pdf_url = reverse('course:certificate_pdf', kwargs={'course_id': course.id})
+    preview_image_url = reverse('course:certificate_preview_image', kwargs={'course_id': course.id})
+
     return render(request, 'course/certificate_detail.html', {
         'certificate': cert,
         'course': course,
         'mentor': mentor,
         'recipient_name': recipient_name,
         'is_owner': True,
+        'pdf_url': pdf_url,
+        'pdf_download_url': f"{pdf_url}?download=1",
+        'preview_image_url': preview_image_url,
     })
 
 def verify_certificate_view(request, certificate_code):
@@ -431,11 +440,81 @@ def verify_certificate_view(request, certificate_code):
     full_name = cert.user.get_full_name().strip()
     recipient_name = full_name if full_name else (cert.user.first_name or cert.user.username)
 
+    pdf_url = reverse('course:verify_certificate_pdf', kwargs={'certificate_code': cert.certificate_code})
+    preview_image_url = reverse('course:verify_certificate_preview_image', kwargs={'certificate_code': cert.certificate_code})
+
     return render(request, 'course/certificate_detail.html', {
         'certificate': cert,
         'course': cert.course,
         'mentor': mentor,
         'recipient_name': recipient_name,
         'is_public_view': True,
+        'pdf_url': pdf_url,
+        'pdf_download_url': f"{pdf_url}?download=1",
+        'preview_image_url': preview_image_url,
     })
+
+@login_required
+@xframe_options_sameorigin
+def download_certificate_pdf_view(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    cert = Certificate.objects.filter(user=request.user, course=course).first()
+
+    if not cert:
+        cert, _ = Certificate.check_and_unlock(request.user, course)
+
+    if not cert:
+        messages.warning(
+            request,
+            f"You haven't completed '{course.title}' yet. Complete all modules to unlock your certificate!"
+        )
+        return redirect('course:course_detail', course_id=course.id)
+
+    # Allow forced refresh if requested via ?refresh=1
+    if request.GET.get('refresh') == '1':
+        pdf_bytes = cert.generate_pdf(save=True)
+    else:
+        pdf_bytes = cert.get_or_create_pdf()
+
+    disposition = 'attachment' if request.GET.get('download') == '1' else 'inline'
+    clean_username = re.sub(r'[^a-zA-Z0-9_-]', '_', cert.user.username)
+    filename = f"Leadership_Certificate_{cert.certificate_code}_{clean_username}.pdf"
+
+    response = HttpResponse(pdf_bytes, content_type='application/pdf')
+    response['Content-Disposition'] = f'{disposition}; filename="{filename}"'
+    return response
+
+@xframe_options_sameorigin
+def download_public_certificate_pdf_view(request, certificate_code):
+    cert = get_object_or_404(Certificate, certificate_code=certificate_code)
+    pdf_bytes = cert.get_or_create_pdf()
+
+    disposition = 'attachment' if request.GET.get('download') == '1' else 'inline'
+    clean_username = re.sub(r'[^a-zA-Z0-9_-]', '_', cert.user.username)
+    filename = f"Leadership_Certificate_{cert.certificate_code}_{clean_username}.pdf"
+
+    response = HttpResponse(pdf_bytes, content_type='application/pdf')
+    response['Content-Disposition'] = f'{disposition}; filename="{filename}"'
+    return response
+
+@login_required
+@xframe_options_sameorigin
+def certificate_preview_image_view(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    cert = Certificate.objects.filter(user=request.user, course=course).first()
+    if not cert:
+        cert, _ = Certificate.check_and_unlock(request.user, course)
+    if not cert:
+        return HttpResponse(status=404)
+
+    from .certificate_generator import render_certificate_preview_image
+    image_bytes = render_certificate_preview_image(cert)
+    return HttpResponse(image_bytes, content_type='image/png')
+
+@xframe_options_sameorigin
+def download_public_certificate_preview_image_view(request, certificate_code):
+    cert = get_object_or_404(Certificate, certificate_code=certificate_code)
+    from .certificate_generator import render_certificate_preview_image
+    image_bytes = render_certificate_preview_image(cert)
+    return HttpResponse(image_bytes, content_type='image/png')
 

@@ -21,3 +21,6 @@ typing_extensions==4.16.0
 tzdata==2023.4
 urllib3==2.1.0
 whitenoise==6.6.0
+pypdf==6.19.0
+reportlab==5.0.1
+pypdfium2==5.14.0

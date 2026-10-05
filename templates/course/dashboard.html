@@ -140,10 +140,15 @@
                                             <p class="text-[11px] font-mono text-gray-400 mt-0.5">ID: {{ cert.certificate_code }}</p>
                                         </div>
                                     </div>
-                                    <div class="pt-3 border-t border-gray-100 flex items-center justify-between">
-                                        <a href="{% url 'course:certificate_detail' course_id=cert.course.id %}" class="text-xs font-bold text-amber-700 hover:text-amber-800 flex items-center">
-                                            <i class="fas fa-eye mr-1"></i> View Certificate
-                                        </a>
+                                    <div class="pt-3 border-t border-gray-100 flex flex-wrap items-center justify-between gap-2">
+                                        <div class="flex items-center space-x-3">
+                                            <a href="{% url 'course:certificate_detail' course_id=cert.course.id %}" class="text-xs font-bold text-amber-700 hover:text-amber-800 flex items-center">
+                                                <i class="fas fa-eye mr-1.5"></i> View Certificate
+                                            </a>
+                                            <a href="{% url 'course:certificate_pdf' course_id=cert.course.id %}?download=1" class="text-xs font-bold text-primary-blue-dark hover:text-amber-600 flex items-center">
+                                                <i class="fas fa-download mr-1.5 text-amber-600"></i> Download Certificate
+                                            </a>
+                                        </div>
                                         <a href="{% url 'course:verify_certificate' certificate_code=cert.certificate_code %}" target="_blank" class="text-[11px] text-gray-400 hover:text-gray-600 flex items-center">
                                             <i class="fas fa-external-link-alt mr-1"></i> Public Verification
                                         </a>

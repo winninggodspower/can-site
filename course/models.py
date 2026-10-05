@@ -170,6 +170,7 @@ class Certificate(models.Model):
     certificate_code = models.CharField(max_length=64, unique=True, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='certificates')
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='certificates')
+    pdf_file = models.FileField(upload_to='certificates/', blank=True, null=True)
     issued_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -184,6 +185,31 @@ class Certificate(models.Model):
             import uuid
             self.certificate_code = f"CAN-{uuid.uuid4().hex[:10].upper()}"
         super().save(*args, **kwargs)
+
+    def generate_pdf(self, save=True):
+        import re
+        from .certificate_generator import generate_leadership_certificate_pdf
+        from django.core.files.base import ContentFile
+        pdf_bytes = generate_leadership_certificate_pdf(self)
+        if save:
+            clean_username = re.sub(r'[^a-zA-Z0-9_-]', '_', self.user.username)
+            filename = f"Certificate_{self.certificate_code}_{clean_username}.pdf"
+            self.pdf_file.save(filename, ContentFile(pdf_bytes), save=True)
+        return pdf_bytes
+
+    def get_or_create_pdf(self):
+        if self.pdf_file and self.pdf_file.name:
+            try:
+                self.pdf_file.open('rb')
+                content = self.pdf_file.read()
+                self.pdf_file.close()
+                if content and content.startswith(b'%PDF'):
+                    return content
+            except Exception:
+                pass
+            # If reading from remote storage failed, generate in-memory cleanly
+            return self.generate_pdf(save=False)
+        return self.generate_pdf(save=True)
 
     @classmethod
     def check_and_unlock(cls, user, course):
@@ -206,6 +232,12 @@ class Certificate(models.Model):
 
         if completed_count >= total_modules:
             cert, created = cls.objects.get_or_create(user=user, course=course)
+            if created or not cert.pdf_file:
+                try:
+                    cert.generate_pdf(save=True)
+                except Exception as e:
+                    import logging
+                    logging.getLogger(__name__).error(f"Error auto-generating certificate PDF for {cert}: {e}")
             return cert, created
 
         return None, False

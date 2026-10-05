@@ -14,5 +14,9 @@ urlpatterns = [
     path('<int:course_id>/modules/<int:module_id>/complete/', views.complete_module_view, name='complete_module'),
     path('<int:course_id>/modules/<int:module_id>/submit_assessment/', views.submit_assessment_view, name='submit_assessment'),
     path('<int:course_id>/certificate/', views.certificate_detail_view, name='certificate_detail'),
+    path('<int:course_id>/certificate/pdf/', views.download_certificate_pdf_view, name='certificate_pdf'),
+    path('<int:course_id>/certificate/preview/', views.certificate_preview_image_view, name='certificate_preview_image'),
     path('certificate/verify/<str:certificate_code>/', views.verify_certificate_view, name='verify_certificate'),
+    path('certificate/verify/<str:certificate_code>/pdf/', views.download_public_certificate_pdf_view, name='verify_certificate_pdf'),
+    path('certificate/verify/<str:certificate_code>/preview/', views.download_public_certificate_preview_image_view, name='verify_certificate_preview_image'),
 ]
