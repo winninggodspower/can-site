@@ -210,15 +210,14 @@ STORAGES = {
     },
 }
 
-# Auto-configure Cloudinary if environment variables are set (e.g. for Railway)
-cloudinary_url = os.environ.get('CLOUDINARY_URL')
+# Auto-configure Cloudinary if environment variables are set
 cloudinary_credentials = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
 }
 
-if cloudinary_url or all(cloudinary_credentials.values()):
+if all(cloudinary_credentials.values()):
     if "cloudinary_storage" not in INSTALLED_APPS:
         idx = INSTALLED_APPS.index("django.contrib.staticfiles")
         INSTALLED_APPS.insert(idx, "cloudinary_storage")
@@ -226,8 +225,5 @@ if cloudinary_url or all(cloudinary_credentials.values()):
         INSTALLED_APPS.append("cloudinary")
 
     CLOUDINARY_STORAGE = {'PREFIX': ''}
-    if cloudinary_url:
-        CLOUDINARY_STORAGE['CLOUDINARY_URL'] = cloudinary_url
-    else:
-        CLOUDINARY_STORAGE.update(cloudinary_credentials)
+    CLOUDINARY_STORAGE.update(cloudinary_credentials)
     STORAGES["default"]["BACKEND"] = "cloudinary_storage.storage.MediaCloudinaryStorage"
