@@ -4,12 +4,11 @@ import os
 from dotenv import load_dotenv
 import dj_database_url
 
-# Load environment variables from .env file
-load_dotenv()
-
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -54,7 +53,9 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "cloudinary_storage",
     "django.contrib.staticfiles",
+    "cloudinary",
 
     "main",
     "user_authentication",
@@ -201,31 +202,19 @@ UNFOLD = {
     },
 }
 
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', ''),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', ''),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', ''),
+    'PREFIX': '',
+}
+
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 
-print('its nwe: ', os.environ.get('new'))
-
-# Auto-configure Cloudinary if environment variables are set
-cloudinary_credentials = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
-}
-
-if all(cloudinary_credentials.values()):
-    if "cloudinary_storage" not in INSTALLED_APPS:
-        idx = INSTALLED_APPS.index("django.contrib.staticfiles")
-        INSTALLED_APPS.insert(idx, "cloudinary_storage")
-    if "cloudinary" not in INSTALLED_APPS:
-        INSTALLED_APPS.append("cloudinary")
-
-    CLOUDINARY_STORAGE = {'PREFIX': ''}
-    CLOUDINARY_STORAGE.update(cloudinary_credentials)
-    STORAGES["default"]["BACKEND"] = "cloudinary_storage.storage.MediaCloudinaryStorage"
