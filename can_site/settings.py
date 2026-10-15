@@ -210,6 +210,8 @@ STORAGES = {
     },
 }
 
+print('its nwe: ', os.env.get('new'))
+
 # Auto-configure Cloudinary if environment variables are set
 cloudinary_credentials = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
