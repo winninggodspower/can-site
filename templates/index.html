@@ -23,12 +23,112 @@
     </div>
 </header>
 
-{% if latest_event %}
+{% if featured_event %}
+<!-- Special Featured Event Section: Business Tech Summit -->
+<section class="relative bg-gradient-to-br from-primary-blue-dark via-[#1e1c4a] to-[#0f0e2b] text-white py-14 md:py-20 overflow-hidden border-b-4 border-primary-gold">
+    <!-- Subtle tech grid pattern -->
+    <div class="absolute inset-0 bg-[radial-gradient(#469bd8_1px,transparent_1px)] [background-size:24px_24px] opacity-15"></div>
+
+    <div class="relative container max-w-6xl px-4 mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-center">
+            
+            <!-- Left Info Block -->
+            <div class="lg:col-span-7 space-y-5 text-center lg:text-left">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-primary-gold/20 text-primary-gold border border-primary-gold/40">
+                    <i class="fas fa-bullhorn text-xs"></i> Special Featured Event
+                </div>
+
+                <div>
+                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
+                        {{ featured_event.title }}
+                    </h2>
+                    {% if featured_event.theme %}
+                    <p class="mt-2 text-base sm:text-lg text-primary-gold font-medium italic">
+                        "{{ featured_event.theme }}"
+                    </p>
+                    {% endif %}
+                </div>
+
+                <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                    {{ featured_event.breif_description }}
+                </p>
+
+                <!-- Unified Dateline Bar -->
+                <div class="p-3.5 rounded-2xl bg-white/[0.06] border border-white/10 backdrop-blur-md max-w-xl mx-auto lg:mx-0 overflow-hidden">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:divide-x sm:divide-white/10 text-left items-center">
+                        <div class="flex items-center gap-2.5 min-w-0 sm:pr-3">
+                            <i class="far fa-calendar-alt text-primary-gold text-base shrink-0"></i>
+                            <div class="min-w-0">
+                                <span class="block text-[10px] uppercase tracking-wider text-slate-400 font-medium">Date</span>
+                                <span class="text-xs sm:text-sm font-semibold text-white whitespace-nowrap">{{ featured_event.event_date|date:"D, M j, Y" }}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2.5 min-w-0 sm:px-3">
+                            <i class="far fa-clock text-primary-gold text-base shrink-0"></i>
+                            <div class="min-w-0">
+                                <span class="block text-[10px] uppercase tracking-wider text-slate-400 font-medium">Time</span>
+                                <span class="text-xs sm:text-sm font-semibold text-white whitespace-nowrap">{{ featured_event.event_date|date:"g:i A" }} WAT</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2.5 min-w-0 sm:pl-3">
+                            <i class="fas fa-map-marker-alt text-primary-gold text-base shrink-0"></i>
+                            <div class="min-w-0">
+                                <span class="block text-[10px] uppercase tracking-wider text-slate-400 font-medium">Location</span>
+                                <span class="text-xs sm:text-sm font-semibold text-white block truncate" title="{{ featured_event.city }}">
+                                    {{ featured_event.city|default:"Port Harcourt" }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CTA Actions -->
+                <div class="pt-4 flex flex-wrap justify-center lg:justify-start gap-4">
+                    <a 
+                        href="{% if featured_event.ticketing_enabled and featured_event.slug %}{% url 'ticketing:event_detail' slug=featured_event.slug %}{% else %}/events{% endif %}"
+                        class="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold text-slate-950 bg-primary-gold hover:bg-yellow-400 active:scale-[0.99] shadow-lg shadow-primary-gold/25 transition-all text-sm"
+                    >
+                        <span>View Details & Get Ticket</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </a>
+                    <a 
+                        href="{% if featured_event.ticketing_enabled and featured_event.slug %}{% url 'ticketing:event_detail' slug=featured_event.slug %}#tickets{% else %}/events{% endif %}"
+                        class="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all text-sm"
+                    >
+                        <i class="fas fa-ticket-alt text-primary-gold"></i>
+                        <span>Register Now</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Flyer Visual Preview -->
+            <div class="lg:col-span-5 flex justify-center">
+                <a 
+                    href="{% if featured_event.ticketing_enabled and featured_event.slug %}{% url 'ticketing:event_detail' slug=featured_event.slug %}{% else %}/events{% endif %}" 
+                    class="block relative group max-w-xs sm:max-w-sm rounded-2xl overflow-hidden shadow-2xl border-2 border-primary-gold/50 bg-slate-950 transform hover:-translate-y-1 transition duration-300"
+                >
+                    <img 
+                        src="{{ featured_event.flyer_url }}" 
+                        alt="{{ featured_event.title }} Flyer" 
+                        class="w-full h-auto object-cover"
+                    />
+                    <div class="absolute inset-0 bg-primary-blue-dark/20 group-hover:bg-transparent transition-colors"></div>
+                    <div class="absolute bottom-3 left-3 right-3 bg-slate-900/90 backdrop-blur-md p-2.5 rounded-xl border border-white/10 flex items-center justify-between text-xs text-white">
+                        <span class="font-semibold text-primary-gold">Click to open summit pass</span>
+                        <i class="fas fa-external-link-alt text-xs"></i>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+    </div>
+</section>
+{% elif latest_event %}
 <section class="bg-primary-gold-light">
     <div class="container justify-between max-w-6xl px-2 py-6 mx-auto md:flex">
         <div class="mx-auto md:mx-0">
-            <span class="block text-center md:text-start">UPCOMING EVENT</span>
-            <p class="text-xl text-center md:text-start">"{{latest_event.title}}"</p>
+            <span class="block text-center md:text-start font-bold text-xs uppercase tracking-wider text-slate-700">UPCOMING EVENT</span>
+            <p class="text-xl text-center md:text-start font-semibold text-slate-900">"{{latest_event.title}}"</p>
         </div>
         <div class="flex justify-center mt-3 md:block">
             <a href="/events" type="button"

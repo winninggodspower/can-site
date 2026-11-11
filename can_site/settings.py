@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "user_authentication",
     "publication",
     "course",
+    "ticketing",
     "django_browser_reload",
 ]
 
@@ -145,7 +146,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Africa/Lagos"
 
 USE_I18N = True
 

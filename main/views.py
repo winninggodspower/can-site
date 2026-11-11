@@ -9,8 +9,13 @@ from .Paystack import PayStack
 
 
 def home(requests):
+    # Prefer featured event, fallback to latest created event
+    featured_event = Event.objects.filter(is_featured=True).order_by('-date_created').first()
+    latest_event = featured_event or Event.objects.order_by('-date_created').first()
+
     context = {
-        'latest_event': Event.objects.order_by('-date_created').first(),
+        'featured_event': featured_event,
+        'latest_event': latest_event,
         'announcements' : list(Announcement.objects.all()),
     }
     return render(requests, 'index.html', context)

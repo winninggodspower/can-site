@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% block head %}
+<title>Staff Check-in | {{ event.title }}</title>
+{% endblock head %}
+
+{% block body %}
+<div class="min-h-[calc(100vh-140px)] bg-slate-50 py-10 px-4">
+    <div class="max-w-xl mx-auto space-y-6">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-md">
+            <span class="text-xs uppercase tracking-wider font-bold text-primary-blue">Staff Gate Portal</span>
+            <h1 class="text-2xl font-bold text-slate-900 mt-1">{{ event.title }} Check-in</h1>
+            <div class="mt-4 flex items-center justify-between text-xs text-slate-600 bg-slate-50 p-3 rounded-lg">
+                <span>Total Paid Attendees: <b>{{ total_tickets }}</b></span>
+                <span>Checked In: <b class="text-emerald-600">{{ checked_in_count }}</b></span>
+            </div>
+
+            <!-- Code Form -->
+            <form method="get" class="mt-6 flex gap-2">
+                <input 
+                    type="text" 
+                    name="code" 
+                    value="{{ query }}"
+                    placeholder="Enter ticket code (e.g. TK-XXXXX)" 
+                    class="block w-full px-4 py-2.5 text-sm uppercase rounded-xl border border-slate-300 focus:border-primary-blue focus:ring-2"
+                    autofocus
+                />
+                <button type="submit" class="px-5 py-2.5 bg-primary-blue text-white font-semibold rounded-xl text-sm">
+                    Search
+                </button>
+            </form>
+        </div>
+
+        {% if action_result %}
+        <div class="p-4 rounded-xl text-sm font-medium {% if action_result.status == 'success' %}bg-emerald-50 text-emerald-800 border border-emerald-200{% elif action_result.status == 'already' %}bg-amber-50 text-amber-800 border border-amber-200{% else %}bg-rose-50 text-rose-800 border border-rose-200{% endif %}">
+            {{ action_result.message }}
+        </div>
+        {% endif %}
+
+        {% if ticket %}
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-md space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-slate-900">{{ ticket.attendee_name }}</h3>
+                <span class="font-mono text-sm font-semibold bg-slate-100 px-2.5 py-1 rounded">{{ ticket.ticket_code }}</span>
+            </div>
+            <p class="text-xs text-slate-500">Tier: <b>{{ ticket.ticket_type.name }}</b> | Buyer: {{ ticket.order.full_name }} ({{ ticket.order.phone }})</p>
+
+            {% if ticket.checked_in %}
+            <div class="p-3 bg-amber-50 text-amber-700 text-xs rounded-lg font-medium">
+                Already checked in at {{ ticket.checked_in_at|date:"M d, g:i A" }}
+            </div>
+            {% else %}
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="check_in" />
+                <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm cursor-pointer shadow-md">
+                    Confirm & Check In
+                </button>
+            </form>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock body %}
+

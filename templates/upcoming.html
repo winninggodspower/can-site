@@ -1,63 +1,100 @@
-{% extends "layout.html" %} {% block head %}
-<title>Upcoming Events</title>
-{% endblock head %} {% block body %}
+{% extends "layout.html" %} 
+{% load static %}
 
-<header class="text-center py-4 pt-16">
-    <h1 class="text-4xl md:font-normal md:text-6xl text-primary-blue">
-        Upcoming Events
-    </h1>
-    <p
-        class="max-w-[600px] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed capitalize text-center text-lg mt-1 mx-auto"
-    >
-        Join us for our upcoming events and connect with our community.
-    </p>
+{% block head %}
+<title>Upcoming Events | Church Arise Network</title>
+{% endblock head %} 
+
+{% block body %}
+<header class="text-center py-6 pt-16 bg-slate-50 border-b border-slate-100">
+    <div class="container max-w-4xl mx-auto px-4">
+        <span class="text-xs uppercase tracking-wider font-bold text-primary-blue">Network Calendar</span>
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-primary-blue-dark mt-1">
+            Upcoming Events & Summits
+        </h1>
+        <p class="text-slate-500 text-sm sm:text-base mt-2 max-w-xl mx-auto">
+            Join visionary leaders, connect with our business community, and take your growth to the next level.
+        </p>
+    </div>
 </header>
 
-<section class="container mx-auto px-4 py-10 md:py-16">
-    <div
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10 md:mt-14"
-    >
+<section class="container max-w-6xl mx-auto px-4 py-12 md:py-16">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {% for event in events %}
-        <!-- Events Card 1 -->
-        <div class="bg-primary-gold-light shadow-md rounded-lg overflow-hidden">
-            <img
-                src="{{event.banner.url}}"
-                alt="Announcement Image"
-                class="w-full h-48 object-cover"
-                width="768"
-                height="200"
-                style="aspect-ratio: 768 / 200; object-fit: cover"
-            />
-            <div class="announcement-card p-4 space-y-4">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-xl font-semibold first-letter:capitalize">
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-lg shadow-slate-100 hover:shadow-xl transition-all duration-300 flex flex-col group">
+            
+            <!-- Event Card Image (Banner or Flyer) -->
+            <div class="relative w-full h-52 bg-slate-900 overflow-hidden">
+                <img
+                    src="{{ event.cover_url }}"
+                    alt="{{ event.title }}"
+                    class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                    onerror="this.src='/static/images/events/business-tech-summit-2026.jpg';"
+                />
+                {% if event.is_featured %}
+                <span class="absolute top-3 right-3 bg-primary-gold text-slate-950 font-bold px-2.5 py-1 rounded-full text-xs shadow-md">
+                    <i class="fas fa-star text-[10px]"></i> Featured
+                </span>
+                {% endif %}
+            </div>
+
+            <!-- Content Area -->
+            <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                <div>
+                    <div class="flex items-center gap-2 text-xs font-semibold text-primary-blue mb-1">
+                        <i class="far fa-calendar-alt"></i>
+                        <span>{{ event.event_date|date:"F d, Y · g:i A" }}</span>
+                    </div>
+
+                    <h3 class="text-xl font-bold text-slate-900 group-hover:text-primary-blue transition-colors">
                         {{ event.title }}
                     </h3>
-                    <span
-                        class="bg-blue-100 text-blue-600 px-2 py-1 rounded-md text-xs font-medium"
+
+                    {% if event.theme %}
+                    <p class="text-xs text-primary-blue-dark font-medium italic mt-1 line-clamp-1">
+                        "{{ event.theme }}"
+                    </p>
+                    {% endif %}
+
+                    <p class="text-sm text-slate-600 mt-2 line-clamp-2">
+                        {{ event.breif_description }}
+                    </p>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 space-y-3">
+                    <div class="flex items-center justify-between text-xs text-slate-500">
+                        <span class="flex items-center gap-1.5">
+                            <i class="fas fa-map-marker-alt text-primary-gold"></i>
+                            <span>{{ event.city|default:"Port Harcourt" }}</span>
+                        </span>
+                        {% if event.ticketing_enabled %}
+                        <span class="font-bold text-emerald-600">Tickets Available</span>
+                        {% endif %}
+                    </div>
+
+                    {% if event.ticketing_enabled and event.slug %}
+                    <a
+                        href="{% url 'ticketing:event_detail' slug=event.slug %}"
+                        class="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-sm text-white bg-primary-blue hover:bg-primary-blue-dark transition-all shadow-md"
                     >
-                        hybrid meeting
-                    </span>
+                        <span>View Details & Register</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </a>
+                    {% else %}
+                    <a
+                        href="{{ event.registration_url|default:'#' }}"
+                        class="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-sm text-white bg-slate-800 hover:bg-slate-900 transition-all shadow-md"
+                    >
+                        <span>Register Now</span>
+                        <i class="fas fa-external-link-alt text-xs"></i>
+                    </a>
+                    {% endif %}
                 </div>
-                <div class="space-y-2">
-                    <p>{{ event.breif_description }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        Registration: {{ event.registration_start_date|date:"F d" }} - {{ event.registration_end_date|date:"F d" }}
-                    </p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        Event Date: {{ event.event_date|date:"F d, Y" }}
-                    </p>
-                </div>
-                <a
-                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary-blue hover:bg-blue-70 text-white hover:bg-primary-blue/90 h-10 px-4 py-2 w-full"
-                    href="{{ event.registration_url }}"
-                >
-                    Register Now
-                </a>
+
             </div>
         </div>
         {% endfor %}
     </div>
 </section>
-
 {% endblock body %}
+

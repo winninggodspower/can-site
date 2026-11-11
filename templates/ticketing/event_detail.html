@@ -1,0 +1,488 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block head %}
+    <title>{{ event.title }} | Church Arise Network</title>
+    <meta name="description" content="{{ event.breif_description }}">
+{% endblock head %}
+{% block body %}
+    <!-- Top Event Hero Banner -->
+    <section class="relative bg-primary-blue-dark text-white overflow-hidden">
+        <!-- Subtle gradient & deep ambient glow -->
+        <div class="absolute inset-0 bg-gradient-to-br from-primary-blue-dark via-[#1a1844] to-[#0c0b24]"></div>
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-primary-blue/20 rounded-full blur-3xl pointer-events-none">
+        </div>
+        <div class="absolute -bottom-40 right-10 w-96 h-96 bg-primary-gold/15 rounded-full blur-3xl pointer-events-none">
+        </div>
+        <div class="relative container max-w-6xl mx-auto px-4 py-12 md:py-20">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+                <!-- Left Column: Editorial Hierarchy -->
+                <div class="lg:col-span-7 space-y-6 text-left">
+                    <!-- Presenter Eyebrow -->
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-primary-gold animate-pulse"></span>
+                        <span class="text-xs uppercase tracking-widest font-semibold text-primary-gold">
+                            {{ event.presenter|default:"Life for Generations® Presents" }}
+                        </span>
+                    </div>
+                    <!-- Title & Theme (No boxed quotes, natural typographic flow) -->
+                    <div class="space-y-3">
+                        <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white leading-[1.08]">
+                            {{ event.title }}
+                        </h1>
+                        {% if event.theme %}
+                            <p class="text-lg sm:text-xl font-medium text-slate-200 leading-snug">
+                                Theme: <span class="text-primary-gold font-semibold">{{ event.theme }}</span>
+                            </p>
+                        {% endif %}
+                    </div>
+                    <p class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-xl">
+                        {{ event.breif_description }}
+                    </p>
+                    <!-- Unified Dateline Bar -->
+                    <div class="p-4 rounded-2xl bg-white/[0.06] border border-white/10 backdrop-blur-md overflow-hidden">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-2 sm:divide-x sm:divide-white/10 text-left items-center">
+                            <!-- Date -->
+                            <div class="flex items-center gap-3 min-w-0 sm:pr-3">
+                                <i class="far fa-calendar-alt text-primary-gold text-lg shrink-0"></i>
+                                <div class="min-w-0">
+                                    <span class="block text-[11px] uppercase tracking-wider text-slate-400 font-medium">Date</span>
+                                    <span class="text-sm font-semibold text-white whitespace-nowrap">{{ event.event_date|date:"D, M j, Y" }}</span>
+                                </div>
+                            </div>
+                            <!-- Time -->
+                            <div class="flex items-center gap-3 min-w-0 sm:px-3">
+                                <i class="far fa-clock text-primary-gold text-lg shrink-0"></i>
+                                <div class="min-w-0">
+                                    <span class="block text-[11px] uppercase tracking-wider text-slate-400 font-medium">Time</span>
+                                    <span class="text-sm font-semibold text-white whitespace-nowrap">{{ event.event_date|date:"g:i A" }} WAT</span>
+                                </div>
+                            </div>
+                            <!-- Venue -->
+                            <div class="flex items-center gap-3 min-w-0 sm:pl-3">
+                                <i class="fas fa-map-marker-alt text-primary-gold text-lg shrink-0"></i>
+                                <div class="min-w-0">
+                                    <span class="block text-[11px] uppercase tracking-wider text-slate-400 font-medium">Location</span>
+                                    <span class="text-sm font-semibold text-white block truncate" title="{{ event.city }}">
+                                        {{ event.city|default:"Port Harcourt" }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Action Strip -->
+                    <div class="pt-2 flex flex-wrap items-center gap-4">
+                        <a href="#tickets"
+                           class="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl font-bold text-slate-950 bg-primary-gold hover:bg-yellow-400 active:scale-[0.99] shadow-lg shadow-primary-gold/20 transition-all text-sm">
+                            <span>Reserve Your Seat</span>
+                            <i class="fas fa-arrow-right text-xs"></i>
+                        </a>
+                        <a href="#flyer-section"
+                           class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-white bg-white/10 hover:bg-white/15 active:scale-[0.99] border border-white/15 transition-all text-sm">
+                            <i class="far fa-eye text-xs"></i>
+                            <span>View Flyer</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- Right Column: Flyer Feature Card -->
+                <div class="lg:col-span-5 flex justify-center">
+                    <div class="relative group max-w-sm rounded-2xl overflow-hidden shadow-2xl border-2 border-primary-gold/40 bg-slate-950">
+                        <img src="{{ event.flyer_url }}"
+                             alt="{{ event.title }} Official Poster"
+                             class="w-full h-auto object-cover transform transition-transform duration-500 group-hover:scale-105" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80 group-hover:opacity-60 transition-opacity">
+                        </div>
+                        <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs text-white">
+                            <span class="inline-flex items-center gap-1 font-medium bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md">
+                                <i class="fas fa-check-circle text-primary-gold"></i> Official Event
+                            </span>
+                            <a href="{{ event.flyer_url }}"
+                               target="_blank"
+                               class="hover:text-primary-gold transition-colors font-semibold underline">
+                                Open Full Size
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bold Statement Section -->
+    <section class="py-10 sm:py-12 bg-slate-900 text-white border-y border-white/10 relative overflow-hidden">
+        <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-primary-blue/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="relative container max-w-4xl mx-auto px-4">
+            <div class="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
+                <!-- High-Visibility Gold Graphic Emblem -->
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-primary-gold to-yellow-500 p-3.5 sm:p-4 flex items-center justify-center shadow-lg shadow-primary-gold/20 shrink-0">
+                    <img src="/static/flaticons/global-network.png" alt="Tech Disruption" class="w-full h-full object-contain" />
+                </div>
+
+                <!-- Standalone Bold Statement -->
+                <h2 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight leading-snug text-center sm:text-left">
+                    Navigating rapid technological disruption with yesterday’s playbook leads to <span class="text-rose-400 underline decoration-rose-500/50 underline-offset-4">stagnation</span> and <span class="text-rose-400 underline decoration-rose-500/50 underline-offset-4">lost market share</span>.
+                </h2>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features & Deliverables Section -->
+    {% if event.highlight_list %}
+        <section class="py-16 sm:py-20 bg-slate-50 border-b border-slate-200">
+            <div class="container max-w-6xl mx-auto px-4">
+                <div class="max-w-2xl mb-12">
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">What to expect at the summit</h2>
+                    <p class="text-slate-600 mt-2 text-sm sm:text-base">Designed for founders and professionals ready to scale productivity.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {% for item in event.highlight_list %}
+                        <div class="bg-white hover:bg-primary-blue-dark rounded-2xl border-2 border-slate-200/90 hover:border-primary-blue-dark shadow-md shadow-slate-200/50 transition-colors duration-300 p-7 flex flex-col justify-between group relative overflow-hidden cursor-default">
+                            <!-- Top Colored Accent Bar -->
+                            <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary-blue via-primary-blue-dark to-primary-gold group-hover:bg-primary-gold transition-colors"></div>
+
+                            <div>
+                                <!-- Header row with index number and thematic icon -->
+                                <div class="flex items-center justify-between mb-5 pt-1">
+                                    <span class="font-mono text-xs font-bold uppercase tracking-wider text-slate-700 bg-slate-100 group-hover:bg-primary-gold group-hover:text-slate-950 px-2.5 py-1 rounded-md transition-colors">
+                                        0{{ forloop.counter }}
+                                    </span>
+                                    <div class="w-10 h-10 rounded-xl bg-primary-blue/10 text-primary-blue group-hover:bg-white/10 group-hover:text-primary-gold flex items-center justify-center transition-colors shadow-sm">
+                                        {% if forloop.counter == 1 %}
+                                            <i class="fas fa-chart-line text-sm"></i>
+                                        {% elif forloop.counter == 2 %}
+                                            <i class="fas fa-rocket text-sm"></i>
+                                        {% elif forloop.counter == 3 %}
+                                            <i class="fas fa-handshake text-sm"></i>
+                                        {% else %}
+                                            <i class="fas fa-users text-sm"></i>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <h3 class="font-bold text-slate-900 group-hover:text-white text-lg leading-snug transition-colors">
+                                    {{ item }}
+                                </h3>
+                            </div>
+
+                            <div class="pt-6 mt-4 border-t border-slate-100 group-hover:border-white/10 flex items-center justify-between text-xs font-medium text-slate-400 group-hover:text-slate-300 transition-colors">
+                                <span>Core Deliverable</span>
+                                <i class="fas fa-arrow-right text-[11px] transform group-hover:translate-x-1.5 group-hover:text-primary-gold transition-all"></i>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    {% endif %}
+    <!-- Speakers Section -->
+    {% if speakers %}
+        <section class="py-16 sm:py-24 bg-slate-50/70 border-b border-slate-200">
+            <div class="container max-w-5xl mx-auto px-4">
+                <div class="text-center max-w-xl mx-auto mb-16">
+                    <span class="text-xs uppercase tracking-wider font-bold text-primary-gold">World-Class Speakers</span>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mt-1">Meet our speakers & host</h2>
+                    <p class="text-slate-500 mt-2 text-sm">Learn directly from leading industry experts and growth strategists.</p>
+                </div>
+
+                <!-- Balanced 3x2 Grid with Overlapping Avatars -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-16 pt-6">
+                    {% for speaker in speakers %}
+                        <div class="relative bg-white rounded-2xl border border-slate-200/90 hover:border-primary-blue/40 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 pt-16 pb-6 px-5 text-center flex flex-col items-center group">
+                            <!-- Top subtle highlight bar on hover -->
+                            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-blue via-primary-blue-dark to-primary-gold opacity-0 group-hover:opacity-100 transition-opacity rounded-t-2xl"></div>
+
+                            <!-- Overlapping Avatar Breaking Out of the Card -->
+                            <div class="absolute -top-12 sm:-top-14 left-1/2 -translate-x-1/2 w-24 h-24 sm:w-28 sm:h-28 rounded-full p-1 ring-4 ring-white shadow-lg transition-transform duration-300 group-hover:scale-105
+                                {% if 'Keynote' in speaker.title_or_role %}
+                                    bg-gradient-to-tr from-primary-gold via-yellow-400 to-amber-200 shadow-primary-gold/25
+                                {% elif 'Host' in speaker.title_or_role %}
+                                    bg-gradient-to-tr from-primary-blue via-primary-blue-dark to-primary-gold shadow-primary-blue/25
+                                {% else %}
+                                    bg-gradient-to-tr from-slate-200 via-slate-100 to-slate-200 group-hover:from-primary-blue group-hover:to-primary-gold shadow-slate-300/50
+                                {% endif %}">
+                                <img src="{{ speaker.photo_url }}"
+                                     alt="{{ speaker.name }}"
+                                     class="w-full h-full object-cover rounded-full bg-slate-200"
+                                     onerror="this.src='/static/icons/church-arise-network-blue.svg';" />
+                            </div>
+
+                            <!-- Speaker Name -->
+                            <h3 class="font-bold text-slate-900 group-hover:text-primary-blue text-base sm:text-lg tracking-tight transition-colors">
+                                {{ speaker.name }}
+                            </h3>
+
+                            <!-- Role Badge -->
+                            <div class="mt-2.5">
+                                {% if 'Keynote' in speaker.title_or_role %}
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-900 border border-amber-200/80 shadow-xs">
+                                        <i class="fas fa-star text-[10px] text-primary-gold"></i>
+                                        Keynote Speaker
+                                    </span>
+                                {% elif 'Host' in speaker.title_or_role %}
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary-blue-dark text-primary-gold border border-primary-gold/30 shadow-xs">
+                                        <i class="fas fa-microphone text-[10px]"></i>
+                                        Host
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200/70">
+                                        Speaker
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    {% endif %}
+    <!-- Tickets & Checkout Section -->
+    <section id="tickets" class="py-16 md:py-24 bg-white">
+        <div class="container max-w-6xl mx-auto px-4">
+            <div class="text-center max-w-xl mx-auto mb-12">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Reserve Your Seat</h2>
+                <p class="text-slate-500 mt-2 text-sm sm:text-base">Instant confirmation. Receive your digital ticket and entry QR code immediately.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-5xl mx-auto">
+                <!-- Ticket Pass Presentation Card -->
+                <div class="lg:col-span-5 bg-gradient-to-br from-primary-blue-dark via-[#141238] to-[#0c0a24] text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden border border-white/10">
+                    <!-- Subtle brand ambient glow -->
+                    <div class="absolute -top-24 -right-24 w-52 h-52 bg-primary-gold/15 rounded-full blur-3xl pointer-events-none"></div>
+
+                    <!-- Pass Eyebrow & Status -->
+                    <div class="flex items-center justify-between gap-2 mb-4">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase bg-primary-gold/15 text-primary-gold border border-primary-gold/30">
+                            <i class="fas fa-ticket-alt text-[10px]"></i> Summit Pass
+                        </span>
+                        <div class="flex items-center gap-1.5 text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
+                            <span class="relative flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                            </span>
+                            <span>{{ primary_ticket.remaining|default:"Seats" }} seats left</span>
+                        </div>
+                    </div>
+
+                    {% if primary_ticket %}
+                        <h3 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-1">{{ primary_ticket.name }} Pass</h3>
+                        <p class="text-slate-300 text-xs sm:text-sm mt-2 leading-relaxed">
+                            {{ primary_ticket.description|default:"Full access to keynote sessions, interactive panels, speaker Q&A, business networking, and summit materials." }}
+                        </p>
+
+                        <!-- Dynamic Price & Quantity Breakdown Box -->
+                        <div class="mt-6 p-4 rounded-2xl bg-white/5 border border-white/10">
+                            <div class="flex items-baseline justify-between text-xs text-slate-300 mb-2">
+                                <span>Unit Price</span>
+                                <span class="font-semibold text-slate-200">₦{{ primary_ticket.price|floatformat:0 }}</span>
+                            </div>
+                            <div class="flex items-baseline justify-between text-xs text-slate-300 mb-3 pb-3 border-b border-white/10">
+                                <span>Quantity Selected</span>
+                                <span id="summarySeatCount" class="font-semibold text-slate-200">1 Seat</span>
+                            </div>
+                            <div class="flex items-baseline justify-between">
+                                <span class="text-xs uppercase tracking-wider font-semibold text-primary-gold">Total Amount</span>
+                                <span id="summaryTotal" class="text-2xl sm:text-3xl font-extrabold text-primary-gold tabular-nums">₦{{ primary_ticket.price|floatformat:0 }}</span>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Trust Signals -->
+                    <div class="mt-6 pt-6 border-t border-dashed border-white/15 space-y-2.5 text-xs text-slate-300">
+                        <p class="flex items-center gap-2.5">
+                            <i class="fas fa-shield-alt text-primary-blue text-sm"></i>
+                            <span>Secure checkout verified by Paystack</span>
+                        </p>
+                        <p class="flex items-center gap-2.5">
+                            <i class="fas fa-qrcode text-primary-gold text-sm"></i>
+                            <span>Instant PDF ticket with gate-scannable QR code</span>
+                        </p>
+                        {% if event.enquiry_phone %}
+                            <p class="flex items-center gap-2.5 text-slate-400">
+                                <i class="fas fa-headset text-slate-400 text-sm"></i>
+                                <span>Direct Support: {{ event.enquiry_phone }}</span>
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Checkout Form Card -->
+                <div class="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xl shadow-slate-100">
+                    <h3 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Attendee Information</h3>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-1 mb-6">No account needed. Enter your details to receive your ticket pass.</p>
+
+                    <form action="{% url 'ticketing:initiate_checkout' slug=event.slug %}"
+                          method="post"
+                          class="space-y-5"
+                          id="ticketCheckoutForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="ticket_type" value="{{ primary_ticket.id }}" />
+
+                        <!-- Interactive Seat Selector (Tactile Minus / Plus Stepper) -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-900 mb-2">Number of Seats to Purchase</label>
+                            <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                                <div class="inline-flex items-center bg-white rounded-xl border border-slate-200 shadow-sm p-1">
+                                    <button type="button"
+                                            id="btnDecrement"
+                                            aria-label="Decrease seat count"
+                                            class="w-10 h-10 rounded-lg flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed transition cursor-pointer">
+                                        <i class="fas fa-minus text-xs"></i>
+                                    </button>
+                                    <div class="w-14 text-center select-none">
+                                        <span id="seatCountDisplay" class="font-extrabold text-xl text-slate-900 tabular-nums">1</span>
+                                    </div>
+                                    <button type="button"
+                                            id="btnIncrement"
+                                            aria-label="Increase seat count"
+                                            class="w-10 h-10 rounded-lg flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed transition cursor-pointer">
+                                        <i class="fas fa-plus text-xs"></i>
+                                    </button>
+                                </div>
+                                <div class="text-right">
+                                    <span id="seatPluralLabel" class="font-bold text-slate-900 block text-sm">1 Seat</span>
+                                    <span class="text-xs text-slate-500">₦{{ primary_ticket.price|floatformat:0 }} per seat</span>
+                                </div>
+                            </div>
+                            <input type="hidden" name="quantity" id="quantityInput" value="1" />
+                        </div>
+
+                        <!-- Full Name -->
+                        <div>
+                            <label for="fullName" class="block text-sm font-semibold text-slate-900 mb-1.5">Full Name</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                    <i class="fas fa-user text-xs"></i>
+                                </span>
+                                <input type="text"
+                                       name="full_name"
+                                       id="fullName"
+                                       required
+                                       placeholder="e.g. Evidence Akpah"
+                                       value="{% if user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% endif %}"
+                                       class="block w-full pl-10 pr-3.5 py-3 text-sm rounded-xl border border-slate-200 focus:border-primary-blue focus:ring-4 focus:ring-primary-blue/15 transition placeholder:text-slate-400 font-medium text-slate-900" />
+                            </div>
+                        </div>
+
+                        <!-- Email Address -->
+                        <div>
+                            <label for="emailAddr" class="block text-sm font-semibold text-slate-900 mb-1.5">Email Address <span class="text-xs font-normal text-slate-500">(for ticket delivery)</span></label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                    <i class="fas fa-envelope text-xs"></i>
+                                </span>
+                                <input type="email"
+                                       name="email"
+                                       id="emailAddr"
+                                       required
+                                       placeholder="you@example.com"
+                                       value="{% if user.is_authenticated %}{{ user.email }}{% endif %}"
+                                       class="block w-full pl-10 pr-3.5 py-3 text-sm rounded-xl border border-slate-200 focus:border-primary-blue focus:ring-4 focus:ring-primary-blue/15 transition placeholder:text-slate-400 font-medium text-slate-900" />
+                            </div>
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div>
+                            <label for="phoneNum" class="block text-sm font-semibold text-slate-900 mb-1.5">Phone Number <span class="text-xs font-normal text-slate-500">(WhatsApp delivery)</span></label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                    <i class="fas fa-phone-alt text-xs"></i>
+                                </span>
+                                <input type="tel"
+                                       name="phone"
+                                       id="phoneNum"
+                                       required
+                                       placeholder="+234 800 000 0000"
+                                       class="block w-full pl-10 pr-3.5 py-3 text-sm rounded-xl border border-slate-200 focus:border-primary-blue focus:ring-4 focus:ring-primary-blue/15 transition placeholder:text-slate-400 font-medium text-slate-900" />
+                            </div>
+                        </div>
+
+                        <!-- Total & Submit Action -->
+                        <div class="pt-5 mt-2 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                            <div>
+                                <span class="text-xs text-slate-400 block font-medium">Total Amount Due</span>
+                                <span id="displayTotal" class="text-2xl sm:text-3xl font-extrabold text-slate-900 tabular-nums">₦{{ primary_ticket.price|floatformat:0 }}</span>
+                            </div>
+                            <button type="submit"
+                                    id="btnSubmitCheckout"
+                                    class="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl font-bold text-white bg-primary-blue hover:bg-primary-blue-dark active:scale-[0.98] shadow-lg shadow-primary-blue/25 hover:shadow-xl transition-all text-sm sm:text-base cursor-pointer">
+                                <span>Proceed to Payment</span>
+                                <i class="fas fa-lock text-xs"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Full Flyer Section Modal / Anchor -->
+    <section id="flyer-section" class="py-16 bg-slate-900 text-white text-center">
+        <div class="container max-w-3xl mx-auto px-4">
+            <span class="text-xs uppercase tracking-wider font-bold text-primary-gold">Event Promotion</span>
+            <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-1 mb-8">Official Business Tech Summit Flyer</h2>
+            <div class="rounded-2xl overflow-hidden shadow-2xl border border-white/10 max-w-lg mx-auto">
+                <img src="{{ event.flyer_url }}"
+                     alt="{{ event.title }}"
+                     class="w-full h-auto" />
+            </div>
+            <p class="text-xs text-slate-400 mt-6">Share this flyer with your colleagues, founders, and network!</p>
+        </div>
+    </section>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const quantityInput = document.getElementById('quantityInput');
+        const seatCountDisplay = document.getElementById('seatCountDisplay');
+        const seatPluralLabel = document.getElementById('seatPluralLabel');
+        const summarySeatCount = document.getElementById('summarySeatCount');
+        const summaryTotal = document.getElementById('summaryTotal');
+        const displayTotal = document.getElementById('displayTotal');
+        const btnDecrement = document.getElementById('btnDecrement');
+        const btnIncrement = document.getElementById('btnIncrement');
+        const checkoutForm = document.getElementById('ticketCheckoutForm');
+        const btnSubmitCheckout = document.getElementById('btnSubmitCheckout');
+
+        const unitPrice = {{ primary_ticket.price|default:0 }};
+        const maxSeats = {{ primary_ticket.max_per_order|default:10 }};
+        const availableSeats = {{ primary_ticket.remaining|default:10 }};
+        const upperLimit = Math.min(maxSeats, availableSeats);
+
+        function updateSeats(newQty) {
+            let qty = Math.max(1, Math.min(newQty, upperLimit));
+            
+            if (quantityInput) quantityInput.value = qty;
+            if (seatCountDisplay) seatCountDisplay.textContent = qty;
+            if (seatPluralLabel) seatPluralLabel.textContent = qty === 1 ? '1 Seat' : qty + ' Seats';
+            if (summarySeatCount) summarySeatCount.textContent = qty === 1 ? '1 Seat' : qty + ' Seats';
+
+            const total = unitPrice * qty;
+            const formattedTotal = '₦' + total.toLocaleString();
+            if (displayTotal) displayTotal.textContent = formattedTotal;
+            if (summaryTotal) summaryTotal.textContent = formattedTotal;
+
+            // Stepper buttons state
+            if (btnDecrement) btnDecrement.disabled = (qty <= 1);
+            if (btnIncrement) btnIncrement.disabled = (qty >= upperLimit);
+        }
+
+        if (btnDecrement && btnIncrement && quantityInput) {
+            btnDecrement.addEventListener('click', function() {
+                const current = parseInt(quantityInput.value) || 1;
+                updateSeats(current - 1);
+            });
+
+            btnIncrement.addEventListener('click', function() {
+                const current = parseInt(quantityInput.value) || 1;
+                updateSeats(current + 1);
+            });
+        }
+
+        if (checkoutForm && btnSubmitCheckout) {
+            checkoutForm.addEventListener('submit', function() {
+                btnSubmitCheckout.disabled = true;
+                btnSubmitCheckout.innerHTML = '<i class="fas fa-spinner fa-spin text-sm"></i><span>Redirecting to Paystack...</span>';
+                btnSubmitCheckout.classList.add('opacity-80', 'cursor-wait');
+            });
+        }
+
+        // Initialize state
+        updateSeats(1);
+    });
+    </script>
+{% endblock body %}

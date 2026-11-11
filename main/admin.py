@@ -1,6 +1,7 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin
 from .models import Announcement, Gallery, Giving, MeetingReport, Welfare, Publication, Event, PublicationPayment
+from ticketing.admin import SpeakerInline, TicketTypeInline
 
 @admin.register(Announcement)
 class AnnouncementAdmin(ModelAdmin):
@@ -32,4 +33,9 @@ class PublicationPaymentAdmin(ModelAdmin):
 
 @admin.register(Event)
 class EventAdmin(ModelAdmin):
-    pass
+    list_display = ('title', 'event_date', 'city', 'is_featured', 'ticketing_enabled')
+    list_filter = ('is_featured', 'ticketing_enabled', 'event_date')
+    search_fields = ('title', 'theme', 'city')
+    prepopulated_fields = {'slug': ('title',)}
+    inlines = [TicketTypeInline, SpeakerInline]
+
