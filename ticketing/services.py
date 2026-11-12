@@ -214,9 +214,15 @@ def generate_ticket_pdf(order):
         if idx > 0:
             elements.append(Spacer(1, 24))
 
-        # QR Widget
-        qr = QrCodeWidget(f"TICKET:{ticket.ticket_code}|EVENT:{order.event.slug}|NAME:{ticket.attendee_name}")
-        d = Drawing(100, 100)
+        # Check-in URL for instant smartphone camera scanning
+        domain = getattr(settings, 'SITE_NAME', 'churcharisenetwork.com.ng').strip()
+        if not domain.startswith('http://') and not domain.startswith('https://'):
+            domain = f"https://{domain}"
+        checkin_url = f"{domain.rstrip('/')}/events/{order.event.slug}/check-in/?code={ticket.ticket_code}"
+
+        # QR Widget encoding live check-in URL
+        qr = QrCodeWidget(checkin_url)
+        d = Drawing(105, 105)
         d.add(qr)
 
         info_text = f"""

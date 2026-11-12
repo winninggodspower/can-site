@@ -115,8 +115,8 @@ def ticket_pdf_view(request, reference):
 def staff_checkin_view(request, slug):
     """Staff ticket scanner / check-in portal."""
     if not request.user.is_staff:
-        messages.error(request, "Staff access only.")
-        return redirect('/login')
+        messages.error(request, "Staff access only. Please log in.")
+        return redirect(f"/login?next={request.get_full_path()}")
 
     event = get_object_or_404(Event, slug=slug)
     query = request.GET.get('code', '').strip().upper()
