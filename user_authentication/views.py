@@ -2,6 +2,7 @@ import os
 import subprocess
 from django.shortcuts import render, redirect, resolve_url
 from django.contrib import messages
+from django.utils.http import url_has_allowed_host_and_scheme
 
 # modules needed for user authentication
 from django.contrib.auth import authenticate, login, logout
@@ -40,33 +41,37 @@ def register(request):
     
 
 def login_user(request):
-    # redirect user to home if already logged in
+    next_url = request.POST.get('next') or request.GET.get('next')
+
+    # redirect user if already logged in
     if request.user.is_authenticated:
         messages.info(request, 'You Are Already Logged In')
+        if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+            return redirect(next_url)
         return redirect('/')
 
     if request.method == 'POST':
         form = LoginForm(request.POST)
 
         if form.is_valid():
-            username = User.objects.filter(email = form.cleaned_data.get('email')).first()
-            print(username)
-            # the authenticate function returns the user object if the user is found else it returns none
+            username = User.objects.filter(email=form.cleaned_data.get('email')).first()
             user = authenticate(username=username, password=form.cleaned_data.get('password'))
             if user:
                 login(request, user)
                 messages.success(request, f'successfully logged in as {user.username}')
+                if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+                    return redirect(next_url)
                 return redirect('course:dashboard')
             else:
                 messages.error(request, 'Invalid credentials')
-                return redirect('/login')
+                return render(request, 'login.html', {'form': form, 'next': next_url})
 
         # if form is not valid render the template again with pre populated data
         else:
-            return render(request, 'login.html', {'form': form})
+            return render(request, 'login.html', {'form': form, 'next': next_url})
     else:
         form = LoginForm()
-        return render(request, 'login.html', {'form': form})
+        return render(request, 'login.html', {'form': form, 'next': next_url})
 
 def login_admin_user(request):
     # redirect user to home if already logged in

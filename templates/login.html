@@ -39,8 +39,11 @@
             {% endif %}
 
             <!-- Form -->
-            <form id="login-form" action="{% url 'login' %}" method="post" class="space-y-5" novalidate>
+            <form id="login-form" method="post" class="space-y-5" novalidate>
                 {% csrf_token %}
+                {% if next or request.GET.next %}
+                    <input type="hidden" name="next" value="{{ next|default:request.GET.next }}" />
+                {% endif %}
 
                 <!-- Email Field -->
                 <div>

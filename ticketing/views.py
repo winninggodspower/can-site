@@ -113,27 +113,57 @@ def ticket_pdf_view(request, reference):
 
 
 def staff_checkin_view(request, slug):
-    """Staff ticket scanner / check-in portal."""
+    """Staff ticket scanner and attendee check-in portal."""
     if not request.user.is_staff:
         messages.error(request, "Staff access only. Please log in.")
         return redirect(f"/login?next={request.get_full_path()}")
 
     event = get_object_or_404(Event, slug=slug)
-    query = request.GET.get('code', '').strip().upper()
+    query = request.GET.get('code', request.GET.get('q', '')).strip().upper()
     ticket = None
     action_result = None
 
-    if query:
+    # Handle check-in action (either from scanned spotlight card or table row button)
+    if request.method == 'POST' and request.POST.get('action') == 'check_in':
+        target_id = request.POST.get('ticket_id')
+        target_code = request.POST.get('ticket_code', query)
+        
+        target_ticket = None
+        if target_id:
+            target_ticket = Ticket.objects.filter(id=target_id, ticket_type__event=event).first()
+        elif target_code:
+            target_ticket = Ticket.objects.filter(ticket_code=target_code, ticket_type__event=event).first()
+
+        if target_ticket:
+            status, msg = check_in_ticket(target_ticket)
+            action_result = {'status': status, 'message': msg}
+            ticket = target_ticket
+        else:
+            action_result = {'status': 'not_found', 'message': "Ticket not found."}
+
+    # If code/search queried on GET
+    elif query:
         ticket = Ticket.objects.filter(ticket_code=query, ticket_type__event=event).first()
         if not ticket:
-            action_result = {'status': 'not_found', 'message': f"No ticket found for code: {query}"}
-        else:
-            if request.method == 'POST' and request.POST.get('action') == 'check_in':
-                status, msg = check_in_ticket(ticket)
-                action_result = {'status': status, 'message': msg}
+            # Try searching by attendee name or phone
+            matching = Ticket.objects.filter(
+                ticket_type__event=event,
+                order__status=TicketOrder.STATUS_PAID
+            ).filter(attendee_name__icontains=query)
+            if matching.count() == 1:
+                ticket = matching.first()
+            elif not matching.exists():
+                action_result = {'status': 'not_found', 'message': f"No ticket found for code or attendee: {query}"}
 
-    total_tickets = Ticket.objects.filter(ticket_type__event=event, order__status=TicketOrder.STATUS_PAID).count()
-    checked_in_count = Ticket.objects.filter(ticket_type__event=event, checked_in=True).count()
+    # Fetch all attendee tickets for the live directory table
+    all_tickets = Ticket.objects.filter(
+        ticket_type__event=event,
+        order__status=TicketOrder.STATUS_PAID
+    ).select_related('order', 'ticket_type').order_by('-checked_in_at', 'attendee_name')
+
+    total_tickets = all_tickets.count()
+    checked_in_count = all_tickets.filter(checked_in=True).count()
+    remaining_count = max(0, total_tickets - checked_in_count)
 
     context = {
         'event': event,
@@ -142,5 +172,7 @@ def staff_checkin_view(request, slug):
         'action_result': action_result,
         'total_tickets': total_tickets,
         'checked_in_count': checked_in_count,
+        'remaining_count': remaining_count,
+        'all_tickets': all_tickets,
     }
     return render(request, 'ticketing/staff_checkin.html', context)
