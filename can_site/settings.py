@@ -174,15 +174,16 @@ PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY')
 PAYSTACK_PUBLIC_KEY = os.environ.get('PAYSTACK_PUBLIC_KEY')
 
 
-#DJANGO email backend
-# Use the default EmailBackend
+# Email Configuration (ZeptoMail SMTP)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'mail.churcharisenetwork.com.ng'
-EMAIL_PORT = 465 # or your SMTP server port
-EMAIL_USE_SSL = True
-EMAIL_HOST_USER = 'send@churcharisenetwork.com.ng'
-EMAIL_HOST_PASSWORD = 'Z8ly_nlR3L2['
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.zeptomail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'emailapikey')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Church Arise Network <tickets@churcharisenetwork.com.ng>')
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 
 SITE_NAME = 'churcharisenetwork.com.ng'

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Tickets for {{ order.event.title }}</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f1f5f9;
+            color: #0f172a;
+        }
+        .wrapper {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .header {
+            background: linear-gradient(135deg, #18163f 0%, #29285d 100%);
+            padding: 32px 24px;
+            text-align: center;
+            color: #ffffff;
+        }
+        .header h1 {
+            margin: 8px 0 0;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+        .theme {
+            font-size: 13px;
+            color: #fbbf24;
+            margin-top: 6px;
+            font-style: italic;
+        }
+        .body-content {
+            padding: 28px 24px;
+        }
+        .greeting {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .lead {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #475569;
+            margin-bottom: 24px;
+        }
+        .card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13px;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            color: #64748b;
+            font-weight: 500;
+        }
+        .detail-value {
+            color: #0f172a;
+            font-weight: 700;
+            text-align: right;
+        }
+        .tickets-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 13px;
+        }
+        .tickets-table th {
+            text-align: left;
+            background-color: #f1f5f9;
+            padding: 10px;
+            color: #475569;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .tickets-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .ticket-code {
+            font-family: monospace;
+            font-weight: bold;
+            color: #29285d;
+            background-color: #e0e7ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .alert-box {
+            background-color: #fefce8;
+            border: 1px solid #fde047;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 13px;
+            color: #713f12;
+            margin-bottom: 24px;
+        }
+        .footer {
+            background-color: #f8fafc;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #94a3b8;
+            border-top: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="header">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #fbbf24; font-weight: bold;">
+                Church Arise Network • Official Pass
+            </div>
+            <h1>{{ order.event.title }}</h1>
+            {% if order.event.theme %}
+                <div class="theme">"{{ order.event.theme }}"</div>
+            {% endif %}
+        </div>
+
+        <div class="body-content">
+            <div class="greeting">Hello {{ order.full_name }},</div>
+            <p class="lead">
+                Thank you for reserving your seat! Your payment has been confirmed and your digital entry passes have been issued.
+            </p>
+
+            <div class="alert-box">
+                📎 <strong>Official PDF Attached:</strong> Your scannable gate passes are attached to this email as a PDF. You can present the barcode on your phone at check-in.
+            </div>
+
+            <div class="card">
+                <div class="detail-row">
+                    <span class="detail-label">Order Reference:</span>
+                    <span class="detail-value">{{ order.reference }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Date & Time:</span>
+                    <span class="detail-value">{{ order.event.event_date|date:"D, M j, Y" }} at {{ order.event.event_date|date:"g:i A" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Venue:</span>
+                    <span class="detail-value">{{ order.event.venue|default:"Port Harcourt" }}{% if order.event.city %}, {{ order.event.city }}{% endif %}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Pass Tier:</span>
+                    <span class="detail-value">{{ order.ticket_type.name }} ({{ order.quantity }} Seat{% if order.quantity > 1 %}s{% endif %})</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Total Amount Paid:</span>
+                    <span class="detail-value">₦{{ order.total_amount|floatformat:0 }}</span>
+                </div>
+            </div>
+
+            <h3 style="font-size: 14px; margin: 20px 0 8px; color: #0f172a;">Your Issued Passes</h3>
+            <table class="tickets-table">
+                <thead>
+                    <tr>
+                        <th>Attendee</th>
+                        <th>Ticket Code</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in order.tickets.all %}
+                        <tr>
+                            <td><strong>{{ ticket.attendee_name }}</strong></td>
+                            <td><span class="ticket-code">{{ ticket.ticket_code }}</span></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if order.event.enquiry_phone %}
+                <p style="font-size: 12px; color: #64748b; margin-top: 24px;">
+                    Questions or enquiries? Contact our summit desk at <strong>{{ order.event.enquiry_phone }}</strong>.
+                </p>
+            {% endif %}
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Church Arise Network. All rights reserved.<br/>
+            This is an automated notification. Please keep this email for summit gate check-in.
+        </div>
+    </div>
+</body>
+</html>
+

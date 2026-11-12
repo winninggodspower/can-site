@@ -3,6 +3,10 @@ import logging
 from django.db import transaction
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 from main.models import Event
 from main.Paystack import PayStack
@@ -105,7 +109,39 @@ def fulfil_ticket_order(order, paystack_ref=""):
                 attendee_name=attendee,
             )
 
+    # Dispatch confirmation email with attached PDF ticket pass
+    send_ticket_confirmation_email(locked_order)
+
     return locked_order
+
+
+def send_ticket_confirmation_email(order):
+    """
+    Render and send ticket confirmation email with attached PDF pass.
+    Catches all exceptions so an SMTP failure never prevents order completion.
+    """
+    try:
+        subject = f"Your Tickets for {order.event.title} [Ref: {order.reference}]"
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', getattr(settings, 'EMAIL_HOST_USER', 'send@churcharisenetwork.com.ng'))
+        to_email = [order.email]
+
+        context = {'order': order}
+        html_content = render_to_string('ticketing/emails/ticket_confirmation.html', context)
+        text_content = strip_tags(html_content)
+
+        msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
+        msg.attach_alternative(html_content, "text/html")
+
+        # Generate and attach PDF pass
+        pdf_buffer = generate_ticket_pdf(order)
+        msg.attach(f"tickets-{order.reference}.pdf", pdf_buffer.getvalue(), "application/pdf")
+
+        msg.send(fail_silently=False)
+        logger.info("Successfully sent ticket confirmation email to %s for order %s", order.email, order.reference)
+        return True
+    except Exception as e:
+        logger.error("Failed to send ticket confirmation email to %s for order %s: %s", order.email, order.reference, e, exc_info=True)
+        return False
 
 
 def verify_and_fulfil_order(reference):
