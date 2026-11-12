@@ -31,6 +31,8 @@ ALLOWED_HOSTS = [
     'www.churcharisenetworkintl.com.ng',
     'can-site.orzn.app',
     'can-site.apps.orizon.ng',
+    'cansite-cb142c3e60e4.herokuapp.com',
+    '.herokuapp.com',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -38,6 +40,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://churcharisenetwork.com.ng",
     "https://churcharisenetworkintl.com.ng",
     "https://www.churcharisenetworkintl.com.ng",
+    "https://cansite-cb142c3e60e4.herokuapp.com",
 ]
 
 
